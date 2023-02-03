@@ -1,9 +1,3 @@
 # kitchen-wizard
 
-# Development prerequisites
-
-* [Docker](https://docs.docker.com/get-docker/)
-* [kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)
-* [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
-* [golang](https://go.dev/doc/install)
-* 
+This project is a playground application to be treated as a dump of multiple technologies working together to run an application.

@@ -3,10 +3,18 @@ GIT_REF = $(shell git describe --tags --exact-match 2>/dev/null || git rev-parse
 # Used for Contour container image tag.
 VERSION ?= $(GIT_REF)
 
-build:
-	mkdir -p bin
-	sudo docker build -t kitchen-wizard:$(VERSION) .
+start-development-environment:
+	./scripts/start-dev-env.sh
 
-build-local:
+go-build:
 	mkdir -p bin
 	cd cmd/kitchen-wizard; go build -o ../../bin
+
+build:
+	sudo docker build -t kitchen-wizard:$(VERSION) .
+
+deploy-local: build
+	echo $(VERSION)
+	helm template development deploy/k8s/ --values deploy/k8s/values-local.yaml | sudo  kubectl apply -f /dev/stdin
+	
+	
