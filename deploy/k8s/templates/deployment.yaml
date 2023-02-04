@@ -23,6 +23,8 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
+          command:
+          - /bin/kitchen-wizard
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:

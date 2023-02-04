@@ -10,9 +10,16 @@ This page is intended to explain how to properly develop/test the application an
 * [golang](https://go.dev/doc/install)
 * [helm](https://helm.sh/docs/intro/install/)
 
+# getting your local IDE to be able to run the tests
+
+* run `make grpc-build`
+* go  mod download
+
+***NOTE*** any modifications under the `pkg/pb` directory will require you run the above steps
+
 # Starting a development environment
 
-run `make start-development-environment`
+* run `make start-development-environment`
 
 # Deploying a local copy of the application
 
