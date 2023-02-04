@@ -7,7 +7,10 @@ start-development-environment:
 	./scripts/start-dev-env.sh
 
 grpc-build:
-	protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative pkg/server/kitchen_wizard.proto 
+	protoc -I/usr/local/include -I. \
+	-I./googleapis/ \
+    -I$GOPATH/src \
+    --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative pkg/server/kitchen_wizard.proto 
 
 go-build:
 	mkdir -p bin
