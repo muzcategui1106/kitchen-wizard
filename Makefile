@@ -2,15 +2,17 @@
 GIT_REF = $(shell git describe --tags --exact-match 2>/dev/null || git rev-parse --short=8 --verify HEAD)
 # Used for Contour container image tag.
 VERSION ?= $(GIT_REF)
+mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
+current_dir := $(patsubst %/,%,$(dir $(mkfile_path)))
 
 start-development-environment:
 	./scripts/start-dev-env.sh
 
 grpc-build:
-	protoc -I/usr/local/include -I. \
-	-I./googleapis/ \
-    -I$GOPATH/src \
-    --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative pkg/server/kitchen_wizard.proto 
+	go get github.com/grpc-ecosystem/grpc-gateway@v1.16.0
+	$GOPATH/pkg/mod/github.com/grpc-ecosystem/grpc-gateway@v1.16.0"
+	#sudo docker build -t grpc-builder:local -f grpc-builder.Dockerfile .
+	#sudo docker run -d  -v $(current_dir)/pkg/server/:/gen grpc-builder:local "bin/sleep" "100000"
 
 go-build:
 	mkdir -p bin

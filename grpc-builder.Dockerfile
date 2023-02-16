@@ -1,4 +1,4 @@
-FROM golang:1.20.0-alpine
+FROM namely:protoc
 
 WORKDIR /app
 
@@ -12,8 +12,7 @@ RUN export PATH="$PATH:$(go env GOPATH)/bin"
 
 COPY go.mod go.mod
 
-RUN go get github.com/googleapis/googleapis@v0.0.0-20230216195746-9de3a8da8b84
-RUN go get github.com/grpc-ecosystem/grpc-gateway@v1.16.0
+
 RUN git clone https://github.com/protocolbuffers/protobuf --depth=1
 RUN mv protobuf $GOPATH/pkg/mod/github.com/googleapis/googleapis@v0.0.0-20230216195746-9de3a8da8b84/google/
 ENV INCLUDE_GOOGLE_APIS="$GOPATH/pkg/mod/github.com/googleapis/googleapis@v0.0.0-20230216195746-9de3a8da8b84"
