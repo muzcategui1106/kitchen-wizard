@@ -1,3 +1,4 @@
+
 FROM golang:1.20.0-alpine as build
 
 RUN apk add g++ && apk add make
@@ -12,17 +13,15 @@ COPY pkg pkg
 COPY Makefile Makefile
 
 # download grpc deps deps
-# TODO enable commented pod once we figure out how to do protoc inside the container
-# RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28
-# RUN go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
-# RUN apk add --no-cache protobuf git \
-#   && go get github.com/golang/protobuf/protoc-gen-go \
-#   && cp /go/bin/protoc-gen-go /usr/bin/
-# RUN export PATH="$PATH:$(go env GOPATH)/bin"
+RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28
+RUN go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
+RUN apk add --no-cache protobuf git \
+  && go get github.com/golang/protobuf/protoc-gen-go \
+  && cp /go/bin/protoc-gen-go /usr/bin/
+RUN export PATH="$PATH:$(go env GOPATH)/bin"
 
 # generate grpc deps
-## TODO this does not work due to issues with the google import for Empty.pro. Figure this out later
-#RUN make grpc-build
+RUN make grpc-build
 
 # get dependencies
 RUN go mod download

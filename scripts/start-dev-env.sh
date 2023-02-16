@@ -1,10 +1,20 @@
-#!/bin/bash -x
+#!/bin/bash
 
-systemctl is-active docker --quiet
-if [ $? -ne 0 ]; then
-    echo "starting docker daemon"
-    systemctl start docker
+if [[ $OSTYPE == 'darwin'* ]]; then
+    sudo docker info
+    if [ $? -ne 0 ]; then
+        echo "please start your docker engine before proceeding"
+        exit 1
+    fi
+
+else
+    systemctl is-active docker --quiet
+    if [ $? -ne 0 ]; then
+        echo "starting docker daemon using systemd"
+        systemctl start docker
+    fi
 fi
+
 
 echo "creating kind cluster"
 sudo kind create cluster

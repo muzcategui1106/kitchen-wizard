@@ -9,6 +9,9 @@ This page is intended to explain how to properly develop/test the application an
 * [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
 * [golang](https://go.dev/doc/install)
 * [helm](https://helm.sh/docs/intro/install/)
+* [golang](https://go.dev/doc/install)
+
+***Note*** In macOS systems you need to isntall docker-desktop as opposed to docker which includes the docker daemon. You also need to disable buildkit as it will make your builds to fail. Simply disable by going into settings. 
 
 # getting your local IDE to be able to run the tests
 
