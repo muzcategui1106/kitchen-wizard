@@ -31,7 +31,7 @@ func main() {
 		logger.Log.Sugar().Warnf("could not setup tracing, erro was %v", err)
 	}
 
-	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", 8443))
+	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", 9443))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}

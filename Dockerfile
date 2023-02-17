@@ -19,8 +19,8 @@ COPY buf.yaml  buf.yaml
 COPY buf.gen.yaml buf.gen.yaml
 COPY buf.lock buf.lock
 
-# download grpc deps deps
-RUN export PATH="$PATH:$(go env GOPATH)/bin"
+# setting path
+RUN export PATH="$PATH:$GOPATH/bin"
 
 # generate grpc deps
 RUN make grpc-build

@@ -10,9 +10,7 @@ SWAGGER_UI_VERSION:=v4.15.5
 start-development-environment:
 	./scripts/start-dev-env.sh
 
-
 grpc-build:
-	#go get github.com/grpc-ecosystem/grpc-gateway
 	go run github.com/bufbuild/buf/cmd/buf@$(BUF_VERSION) mod update
 	go run github.com/bufbuild/buf/cmd/buf@$(BUF_VERSION) generate
 
@@ -22,16 +20,15 @@ go-build:
 
 build:
 	echo "building image"
-	sudo docker build -t kitchen-wizard:$(VERSION) .
+	docker build -t kitchen-wizard:$(VERSION) .
 
 deploy-local: build
 	echo "loading image to local cluster"
-	sudo kind load docker-image kitchen-wizard:$(VERSION)
+	kind load docker-image kitchen-wizard:$(VERSION)
 
 	echo "generating k8s manifests"
 	helm template development deploy/k8s/ --values deploy/k8s/values-local.yaml | sudo  kubectl apply -f /dev/stdin
 	
-
 	echo "sleeping 5 seconds to ensure image has gotten to nodes"
 	sleep 5
 

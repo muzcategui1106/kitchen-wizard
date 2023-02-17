@@ -23,11 +23,11 @@ type kitchenWizardService struct{}
 // NewApiGRPCServer creates a GRPC server for the API
 func NewApiGRPCServer(ctx context.Context, listener net.Listener, cfg Config) (*grpc.Server, error) {
 	opts := []grpc.ServerOption{}
-	opts = grpc_middleware.AddLogging(logger.Log, opts)
-	opts = grpc_middleware.AddTracing(opts)
+	lg := logger.Log
+	opts = grpc_middleware.AddUnaryInterceptors(opts, lg)
+	opts = grpc_middleware.AddStreamInterceptors(opts, lg)
 	grpcServer := grpc.NewServer(opts...)
 	v1.RegisterApiServer(grpcServer, newKitchenWizardServer())
-
 	return grpcServer, nil
 }
 
@@ -35,13 +35,13 @@ func NewApiHTTPServer(ctx context.Context) (*http.Server, error) {
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 	mux := runtime.NewServeMux()
 	rest_middleware.AddLogger(logger.Log, mux)
-	err := v1.RegisterApiHandlerFromEndpoint(ctx, mux, "localhost:8443", opts)
+	err := v1.RegisterApiHandlerFromEndpoint(ctx, mux, "localhost:9443", opts)
 	if err != nil {
 		return nil, err
 	}
 
 	srv := &http.Server{
-		Addr: "0.0.0.0:443",
+		Addr: "0.0.0.0:8443",
 		// add handler with middleware
 		Handler: rest_middleware.AddRequestID(
 			rest_middleware.AddLogger(logger.Log, mux)),
