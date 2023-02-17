@@ -9,6 +9,7 @@ import (
 
 	"github.com/muzcategui1106/kitchen-wizard/pkg/api"
 	"github.com/muzcategui1106/kitchen-wizard/pkg/logger"
+	"github.com/muzcategui1106/kitchen-wizard/pkg/util/tracing"
 )
 
 func main() {
@@ -20,8 +21,14 @@ func main() {
 		"Print time format for logger e.g. 2006-01-02T15:04:05Z07:00")
 	flag.Parse()
 
+	mainContext := context.Background()
+
 	if err := logger.Init(logLevel, logTimeFormat); err != nil {
 		log.Fatalf("failed to initialize logging: %v", err)
+	}
+
+	if err := tracing.InitJaegerTracer(mainContext); err != nil {
+		logger.Log.Sugar().Warnf("could not setup tracing, erro was %v", err)
 	}
 
 	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", 8443))
@@ -29,17 +36,15 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	serverContext := context.Background()
-
 	// start grpc server
-	grpcServer, err := api.NewApiGRPCServer(serverContext, lis, api.Config{})
+	grpcServer, err := api.NewApiGRPCServer(mainContext, lis, api.Config{})
 	if err != nil {
 		log.Fatalf("could not initialize grpc server: %v", err)
 	}
 	go grpcServer.Serve(lis)
 
 	// start http server
-	httpServer, err := api.NewApiHTTPServer(serverContext)
+	httpServer, err := api.NewApiHTTPServer(mainContext)
 	if err != nil {
 		log.Fatalf("could not initialize http server: %v", err)
 	}

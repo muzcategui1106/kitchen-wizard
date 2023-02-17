@@ -15,6 +15,9 @@ COPY go.sum go.sum
 COPY cmd cmd
 COPY pkg pkg
 COPY Makefile Makefile
+COPY buf.yaml  buf.yaml
+COPY buf.gen.yaml buf.gen.yaml
+COPY buf.lock buf.lock
 
 # download grpc deps deps
 RUN export PATH="$PATH:$(go env GOPATH)/bin"
@@ -36,7 +39,7 @@ RUN make go-build
 FROM golang:1.20.0-alpine AS final
 
 WORKDIR /
-COPY --from=build /app/bin/kitchen-wizard /bin/kitchen-wizard
+COPY --from=build /app/bin/api /bin/api
 
 
 

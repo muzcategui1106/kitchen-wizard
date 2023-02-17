@@ -1,5 +1,0 @@
-apiVersion: v2
-name: kitchen-wizard
-description: application to server your all kitchen needs
-type: application
-version: 0.1.0

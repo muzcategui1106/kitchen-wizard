@@ -24,7 +24,7 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           command:
-          - /bin/kitchen-wizard
+          - /bin/api
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:

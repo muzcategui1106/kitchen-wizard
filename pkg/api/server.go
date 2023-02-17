@@ -24,7 +24,7 @@ type kitchenWizardService struct{}
 func NewApiGRPCServer(ctx context.Context, listener net.Listener, cfg Config) (*grpc.Server, error) {
 	opts := []grpc.ServerOption{}
 	opts = grpc_middleware.AddLogging(logger.Log, opts)
-	//grpc_middleware.AddTracing(opts)
+	opts = grpc_middleware.AddTracing(opts)
 	grpcServer := grpc.NewServer(opts...)
 	v1.RegisterApiServer(grpcServer, newKitchenWizardServer())
 

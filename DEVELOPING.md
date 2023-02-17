@@ -23,6 +23,9 @@ This page is intended to explain how to properly develop/test the application an
 # Starting a development environment
 
 * run `make start-development-environment`
+* do the following step if you need to get access to the jaegger collector
+    * modify /etc/hosts in your machine and add the following line
+        `127.0.0.1 collector.observability.com`
 
 # Deploying a local copy of the application
 

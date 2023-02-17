@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: {{ .Values.namespace }}
-  labels:
-    chart: {{ template "kitchen-wizard.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}

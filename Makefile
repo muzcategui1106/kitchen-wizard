@@ -18,7 +18,7 @@ grpc-build:
 
 go-build:
 	mkdir -p bin
-	cd cmd/kitchen-wizard; go build -o ../../bin
+	cd cmd/api; go build -o ../../bin
 
 build:
 	echo "building image"
