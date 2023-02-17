@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"net/http"
 
 	"github.com/muzcategui1106/kitchen-wizard/pkg/api"
 	"github.com/muzcategui1106/kitchen-wizard/pkg/logger"
@@ -44,7 +43,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not initialize http server: %v", err)
 	}
-	go http.ListenAndServe("0.0.0.0:443", httpServer)
+	go httpServer.ListenAndServe()
 
 	// run forerver
 	stop := make(chan struct{}, 1)

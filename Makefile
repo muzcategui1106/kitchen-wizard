@@ -12,7 +12,7 @@ start-development-environment:
 
 
 grpc-build:
-	go get github.com/grpc-ecosystem/grpc-gateway
+	#go get github.com/grpc-ecosystem/grpc-gateway
 	go run github.com/bufbuild/buf/cmd/buf@$(BUF_VERSION) mod update
 	go run github.com/bufbuild/buf/cmd/buf@$(BUF_VERSION) generate
 

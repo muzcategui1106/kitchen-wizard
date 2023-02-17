@@ -1,11 +1,8 @@
 package middleware
 
 import (
-	"context"
-
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
-	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -20,7 +17,7 @@ func AddLogging(logger *zap.Logger, opts []grpc.ServerOption) []grpc.ServerOptio
 		grpc_zap.WithLevels(codeToLevel),
 	}
 	// Make sure that log statements internal to gRPC library are logged using the zapLogger as well.
-	grpc_zap.ReplaceGrpcLogger(logger)
+	grpc_zap.ReplaceGrpcLoggerV2(logger)
 
 	// Add unary interceptor
 	opts = append(opts, grpc_middleware.WithUnaryServerChain(
@@ -35,19 +32,6 @@ func AddLogging(logger *zap.Logger, opts []grpc.ServerOption) []grpc.ServerOptio
 	))
 
 	return opts
-}
-
-// Extract takes the call-scoped Logger from grpc_zap middleware.
-// Deprecated: should use the ctxzap.Extract instead
-func Extract(ctx context.Context) *zap.Logger {
-	return ctxzap.Extract(ctx)
-}
-
-// ToContext adds the zap.Logger to the context for extraction later.
-// Returning the new context that has been created.
-// Deprecated: use ctxzap.ToContext
-func ToContext(ctx context.Context, logger *zap.Logger) context.Context {
-	return ctxzap.ToContext(ctx, logger)
 }
 
 // codeToLevel redirects OK to DEBUG level logging instead of INFO
