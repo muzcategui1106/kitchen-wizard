@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "kitchen-wizard.fullname" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ template "kitchen-wizard.name" . }}
+    chart: {{ template "kitchen-wizard.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 443
+      targetPort: https
+      protocol: TCP
+      name: https
+  selector:
+    app: {{ template "kitchen-wizard.name" . }}
+    release: {{ .Release.Name }}

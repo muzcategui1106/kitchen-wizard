@@ -13,16 +13,6 @@ import (
 	"google.golang.org/grpc/codes"
 )
 
-// codeToLevel redirects OK to DEBUG level logging instead of INFO
-// This is example how you can log several gRPC code results
-func codeToLevel(code codes.Code) zapcore.Level {
-	if code == codes.OK {
-		// It is DEBUG
-		return zap.DebugLevel
-	}
-	return grpc_zap.DefaultCodeToLevel(code)
-}
-
 // AddLogging returns grpc.Server config option that turn on logging.
 func AddLogging(logger *zap.Logger, opts []grpc.ServerOption) []grpc.ServerOption {
 	// Shared options for the logger, with a custom gRPC code to log level function.
@@ -58,4 +48,14 @@ func Extract(ctx context.Context) *zap.Logger {
 // Deprecated: use ctxzap.ToContext
 func ToContext(ctx context.Context, logger *zap.Logger) context.Context {
 	return ctxzap.ToContext(ctx, logger)
+}
+
+// codeToLevel redirects OK to DEBUG level logging instead of INFO
+// This is example how you can log several gRPC code results
+func codeToLevel(code codes.Code) zapcore.Level {
+	if code == codes.OK {
+		// It is DEBUG
+		return zap.DebugLevel
+	}
+	return grpc_zap.DefaultCodeToLevel(code)
 }

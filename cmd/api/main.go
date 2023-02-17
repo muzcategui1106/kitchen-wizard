@@ -1,13 +1,15 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 
+	"github.com/muzcategui1106/kitchen-wizard/pkg/api"
 	"github.com/muzcategui1106/kitchen-wizard/pkg/logger"
-	"github.com/muzcategui1106/kitchen-wizard/pkg/server"
 )
 
 func main() {
@@ -23,14 +25,29 @@ func main() {
 		log.Fatalf("failed to initialize logging: %v", err)
 	}
 
-	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", 8443))
+	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", 8443))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	grpcServer, err := server.NewKitchenWizardServer(lis, server.Config{})
+	serverContext := context.Background()
+
+	// start grpc server
+	grpcServer, err := api.NewApiGRPCServer(serverContext, lis, api.Config{})
 	if err != nil {
 		log.Fatalf("could not initialize grpc server: %v", err)
 	}
-	grpcServer.Serve(lis)
+	go grpcServer.Serve(lis)
+
+	// start http server
+	httpServer, err := api.NewApiHTTPServer(serverContext)
+	if err != nil {
+		log.Fatalf("could not initialize http server: %v", err)
+	}
+	go http.ListenAndServe("0.0.0.0:443", httpServer)
+
+	// run forerver
+	stop := make(chan struct{}, 1)
+	<-stop
+
 }

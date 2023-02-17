@@ -1,5 +1,7 @@
 bin
 *pb.go
+*pb.gw.go
 googleapis
 grpc-gateway
 protobuf
+*/gen

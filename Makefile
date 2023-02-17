@@ -4,15 +4,17 @@ GIT_REF = $(shell git describe --tags --exact-match 2>/dev/null || git rev-parse
 VERSION ?= $(GIT_REF)
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 current_dir := $(patsubst %/,%,$(dir $(mkfile_path)))
+BUF_VERSION:=v1.9.0
+SWAGGER_UI_VERSION:=v4.15.5
 
 start-development-environment:
 	./scripts/start-dev-env.sh
 
+
 grpc-build:
-	go get github.com/grpc-ecosystem/grpc-gateway@v1.16.0
-	$GOPATH/pkg/mod/github.com/grpc-ecosystem/grpc-gateway@v1.16.0"
-	#sudo docker build -t grpc-builder:local -f grpc-builder.Dockerfile .
-	#sudo docker run -d  -v $(current_dir)/pkg/server/:/gen grpc-builder:local "bin/sleep" "100000"
+	go get github.com/grpc-ecosystem/grpc-gateway
+	go run github.com/bufbuild/buf/cmd/buf@$(BUF_VERSION) mod update
+	go run github.com/bufbuild/buf/cmd/buf@$(BUF_VERSION) generate
 
 go-build:
 	mkdir -p bin

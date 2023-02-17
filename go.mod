@@ -3,15 +3,15 @@ module github.com/muzcategui1106/kitchen-wizard
 go 1.20
 
 require (
-	github.com/golang/protobuf v1.5.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	go.uber.org/zap v1.24.0
 	google.golang.org/grpc v1.52.3
 )
 
 require (
-	github.com/googleapis/googleapis v0.0.0-20230216195746-9de3a8da8b84 // indirect
+	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.0 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/net v0.5.0 // indirect

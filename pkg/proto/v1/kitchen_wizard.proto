@@ -13,43 +13,15 @@
 // limitations under the License.
 
 syntax = "proto3";
-package server;
+package v1;
 
 import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
-import "protoc-gen-swagger/options/annotations.proto";
 
-option go_package = "muzcategui1106/kitchen-wizard/pkg/server";
-
-option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
-	info: {
-		title: "Kitchen-Wizard";
-		version: "1.0";
-		contact: {
-			name: "Miguel Uzcategui";
-			url: "https://github.com/muzcategui1106/kitchen-wizard";
-			email: "fake@gmail.com";
-        };
-    };
-    schemes: HTTP;
-    consumes: "application/json";
-    produces: "application/json";
-    responses: {
-		key: "404";
-		value: {
-			description: "Returned when the resource does not exist.";
-			schema: {
-				json_schema: {
-					type: STRING;
-				}
-			}
-		}
-	}
-};
-
+option go_package = "github.com/muzcategui1106/kitchen-wizard/pkg/server";
 
 // Interface exported by the server.
-service kitchenwizard {
+service api {
   // Returns the health of th service
   rpc Healthz(google.protobuf.Empty) returns (HealthzResponse) {
     option (google.api.http) = {
