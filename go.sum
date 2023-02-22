@@ -40,6 +40,10 @@ github.com/opentracing/opentracing-go v1.1.0 h1:pWlfV3Bxv7k65HYwkikxat0+s3pV4bsq
 github.com/opentracing/opentracing-go v1.1.0/go.mod h1:UkNAQd3GIcIGf0SeVgPpRdFStlNbqXla1AfSYxPUl2o=
 github.com/opentracing/opentracing-go v1.2.0 h1:uEJPy/1a5RIPAJ0Ov+OIO8OxWu77jEv+1B0VhjKrZUs=
 github.com/opentracing/opentracing-go v1.2.0/go.mod h1:GxEUsuufX4nBwe+T+Wl9TAgYrxe9dPLANfrWvHYVTgc=
+github.com/philips/go-bindata-assetfs v0.0.0-20150624150248-3dcc96556217 h1:d0gvU83WNkaQFi/xS0KbHf8G8cXwowAFcoZnIYlmPiE=
+github.com/philips/go-bindata-assetfs v0.0.0-20150624150248-3dcc96556217/go.mod h1:fFa4wLHd7+D2mWRwlStkwVYMtIc/+odU35B0qn/x4WU=
+github.com/philips/grpc-gateway-example v0.0.0-20170619012617-a269bcb5931c h1:JI3Tfql2WN7MI3CQzJ93YptrW5GCM2Rn2cdBCZIRjmQ=
+github.com/philips/grpc-gateway-example v0.0.0-20170619012617-a269bcb5931c/go.mod h1:A1Gkiuqr8C81MmlrWwc/lqXIlmTVb/qP8geXw5Jt3X8=
 github.com/pkg/errors v0.8.1 h1:iURUrRGxPUNPdy5/HRSm+Yj6okJ6UtLINN0Q9M4+h3I=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=

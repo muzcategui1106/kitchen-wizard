@@ -39,6 +39,7 @@ RUN make go-build
 FROM golang:1.20.0-alpine AS final
 
 WORKDIR /
+COPY swagger/pkg/proto/v1/kitchen_wizard.swagger.json /swagger/kitchen_wizard.swagger.json 
 COPY --from=build /app/bin/api /bin/api
 
 

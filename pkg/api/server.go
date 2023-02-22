@@ -2,6 +2,7 @@ package api
 
 import (
 	context "context"
+	"mime"
 	"net"
 	"net/http"
 
@@ -33,21 +34,34 @@ func NewApiGRPCServer(ctx context.Context, listener net.Listener, cfg Config) (*
 
 func NewApiHTTPServer(ctx context.Context) (*http.Server, error) {
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
-	mux := runtime.NewServeMux()
-	rest_middleware.AddLogger(logger.Log, mux)
-	err := v1.RegisterApiHandlerFromEndpoint(ctx, mux, "localhost:9443", opts)
+	gwMux := runtime.NewServeMux()
+	mux := http.NewServeMux()
+	rest_middleware.AddLogger(logger.Log, gwMux)
+
+	// add swagger
+	mime.AddExtensionType(".svg", "image/svg+xml")
+
+	swaggerUIHandler := http.FileServer(http.Dir("./swagger-ui"))
+
+	swaggerUIPrefix := "/swagger-ui/"
+	mux.Handle("/", gwMux)
+	mux.Handle(swaggerUIPrefix, http.StripPrefix(swaggerUIPrefix, swaggerUIHandler))
+
+	err := v1.RegisterApiHandlerFromEndpoint(ctx, gwMux, "localhost:9443", opts)
 	if err != nil {
 		return nil, err
 	}
 
 	srv := &http.Server{
 		Addr: "0.0.0.0:8443",
-		// add handler with middleware
 		Handler: rest_middleware.AddRequestID(
 			rest_middleware.AddLogger(logger.Log, mux)),
 	}
 
 	return srv, nil
+}
+
+func serveSwagger(mux *http.ServeMux) {
 }
 
 func newKitchenWizardServer() *kitchenWizardService {

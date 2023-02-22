@@ -33,6 +33,6 @@ deploy-local: build
 	sleep 5
 
 	echo "restarting deployments to ensure latest version is used"
-	sudo kubectl -n kitchen-wizard rollout restart deployments
+	kubectl -n kitchen-wizard rollout restart deployments
 	
 	

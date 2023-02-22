@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "kitchen-wizard.fullname" . }}
+  name: api
   namespace: {{ .Values.namespace }}
   labels:
-    app: {{ template "kitchen-wizard.name" . }}
+    app: api
     chart: {{ template "kitchen-wizard.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
@@ -18,7 +18,7 @@ spec:
     - port: 9443
       targetPort: grpc
       protocol: TCP
-      name: https
+      name: grpc
   selector:
-    app: {{ template "kitchen-wizard.name" . }}
+    app: api
     release: {{ .Release.Name }}

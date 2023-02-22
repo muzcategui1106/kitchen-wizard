@@ -4,15 +4,27 @@ import (
 	"context"
 
 	"github.com/muzcategui1106/kitchen-wizard/pkg/logger"
+	"github.com/opentracing/opentracing-go"
+	"github.com/uber/jaeger-client-go"
 	jaegercfg "github.com/uber/jaeger-client-go/config"
 	jaegerlog "github.com/uber/jaeger-client-go/log"
 	"github.com/uber/jaeger-lib/metrics"
 )
 
-func InitJaegerTracer(ctx context.Context) error {
+func InitJaegerTracer(ctx context.Context, collectorAddress string) error {
 	// Recommended configuration for production.
-	logger.Log.Info("setting up opentracing global tracer")
-	cfg := jaegercfg.Configuration{}
+	logger.Log.Sugar().Infof("setting up opentracing global tracer to send traaces to %v", collectorAddress)
+	cfg := jaegercfg.Configuration{
+		ServiceName: "kitchen-wizard-api",
+		Sampler: &jaegercfg.SamplerConfig{
+			Type:  jaeger.SamplerTypeConst,
+			Param: 1,
+		},
+		Reporter: &jaegercfg.ReporterConfig{
+			LogSpans:          true,
+			CollectorEndpoint: collectorAddress,
+		},
+	}
 
 	// Example logger and metrics factory. Use github.com/uber/jaeger-client-go/log
 	// and github.com/uber/jaeger-lib/metrics respectively to bind to real logging and metrics
@@ -21,8 +33,7 @@ func InitJaegerTracer(ctx context.Context) error {
 	jMetricsFactory := metrics.NullFactory
 
 	// Initialize tracer with a logger and a metrics factory
-	closer, err := cfg.InitGlobalTracer(
-		"collector-collector.observability.svc:14268",
+	tracer, closer, err := cfg.NewTracer(
 		jaegercfg.Logger(jLogger),
 		jaegercfg.Metrics(jMetricsFactory),
 	)
@@ -30,8 +41,11 @@ func InitJaegerTracer(ctx context.Context) error {
 		return err
 	}
 
+	opentracing.SetGlobalTracer(tracer)
+
 	go func() {
 		<-ctx.Done()
+		logger.Log.Info("closing open tracer")
 		closer.Close()
 	}()
 

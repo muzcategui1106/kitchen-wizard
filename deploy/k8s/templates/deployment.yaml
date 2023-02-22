@@ -1,10 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "kitchen-wizard.fullname" . }}
+  name: api
   namespace: {{ .Values.namespace }}
   labels:
-    app: {{ template "kitchen-wizard.name" . }}
+    app: api
     chart: {{ template "kitchen-wizard.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
@@ -13,18 +13,19 @@ spec:
   revisionHistoryLimit: 3
   selector:
     matchLabels:
-      app: {{ template "kitchen-wizard.name" . }}
+      app: api
       release: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ template "kitchen-wizard.name" . }}
+        app: api
         release: {{ .Release.Name }}
     spec:
       containers:
         - name: {{ .Chart.Name }}
           command:
           - /bin/api
+          - --otp-collector-address=http://collector-collector.observability.svc:14268/api/traces
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
@@ -33,6 +34,6 @@ spec:
               protocol: TCP
             - name: grpc
               containerPort: 9443
-              protocol: tcp
+              protocol: TCP
           resources:
 {{ toYaml .Values.resources | indent 12 }}
