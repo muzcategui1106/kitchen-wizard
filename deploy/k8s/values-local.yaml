@@ -1,3 +1,11 @@
+isLocal: true
+
 image:
   tag: local
   pullPolicy: IfNotPresent
+
+apiURL: api.kitchen-wizard.local.uzcatm-skylab.com
+jaegerCollectorURL: collector.observability.local.uzcatm-skylab.com
+dexURL: dex.dex.local.uzcatm-skylab.com
+
+awsAccessKeyID: AKIAZHDHU5LQIDB2DGHZ

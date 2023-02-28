@@ -18,16 +18,22 @@ go-build:
 	mkdir -p bin
 	cd cmd/api; go build -o ../../bin
 
-build:
-	echo "building image"
-	docker build -t kitchen-wizard:$(VERSION) .
+run-localhost: go-build
+	./bin/api --dex-provider-url "https://dex.dex.local.uzcatm-skylab.com" \
+	--oidc-client-id example-app \
+	--oidc-client-secret ZXhhbXBsZS1hcHAtc2VjcmV0 \
+	--oidc-redirect-url http://localhost:8443
 
-deploy-local: build
+build-local:
+	echo "building image"
+	docker build -t kitchen-wizard:local .
+
+deploy-local: build-local
 	echo "loading image to local cluster"
-	kind load docker-image kitchen-wizard:$(VERSION)
+	kind load docker-image kitchen-wizard:local
 
 	echo "generating k8s manifests"
-	helm template development deploy/k8s/ --values deploy/k8s/values-local.yaml | sudo  kubectl apply -f /dev/stdin
+	helm template development deploy/k8s/ --values deploy/k8s/values-local.yaml | kubectl apply -f /dev/stdin
 	
 	echo "sleeping 5 seconds to ensure image has gotten to nodes"
 	sleep 5

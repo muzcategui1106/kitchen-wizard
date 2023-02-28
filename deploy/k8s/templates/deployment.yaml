@@ -24,8 +24,14 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           command:
-          - /bin/api
+          - /api
           - --otp-collector-address=http://collector-collector.observability.svc:14268/api/traces
+          {{ if .Values.isLocal }}
+          - --dex-provider-url=https://dex.dex.local.uzcatm-skylab.com 
+          - --oidc-client-id=example-app 
+          - --oidc-client-secret=ZXhhbXBsZS1hcHAtc2VjcmV0
+          - --oidc-redirect-url=http://api.kitchen-wizard.local.uzcatm-skylab.com
+          {{ end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:

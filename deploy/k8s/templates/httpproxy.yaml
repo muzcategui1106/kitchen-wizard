@@ -12,7 +12,7 @@ metadata:
     kubernetes.io/ingress.class: contour
 spec:
   virtualhost:
-    fqdn: api.kitchen-wizard.com
+    fqdn: {{ .Values.apiURL }}
   routes:
     - conditions:
       - prefix: /

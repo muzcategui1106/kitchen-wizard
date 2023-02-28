@@ -3,6 +3,8 @@
 # Declare variables to be passed into your templates.
 namespace: kitchen-wizard
 
+isLocal: false
+
 image:
   repository: kitchen-wizard
   tag: 0.0.1

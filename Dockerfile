@@ -18,6 +18,7 @@ COPY Makefile Makefile
 COPY buf.yaml  buf.yaml
 COPY buf.gen.yaml buf.gen.yaml
 COPY buf.lock buf.lock
+COPY swagger-ui /swagger-ui
 
 # setting path
 RUN export PATH="$PATH:$GOPATH/bin"
@@ -39,8 +40,8 @@ RUN make go-build
 FROM golang:1.20.0-alpine AS final
 
 WORKDIR /
-COPY swagger/pkg/proto/v1/kitchen_wizard.swagger.json /swagger/kitchen_wizard.swagger.json 
-COPY --from=build /app/bin/api /bin/api
+COPY --from=build  /app/swagger-ui /swagger-ui
+COPY --from=build /app/bin/api /api
 
 
 

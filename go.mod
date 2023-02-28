@@ -14,6 +14,8 @@ require (
 )
 
 require (
+	github.com/coreos/go-oidc/v3 v3.5.0 // indirect
+	github.com/go-jose/go-jose/v3 v3.0.0 // indirect
 	github.com/philips/go-bindata-assetfs v0.0.0-20150624150248-3dcc96556217 // indirect
 	github.com/philips/grpc-gateway-example v0.0.0-20170619012617-a269bcb5931c // indirect
 	github.com/pkg/errors v0.8.1 // indirect
@@ -22,7 +24,10 @@ require (
 	github.com/uber/jaeger-lib v2.4.1+incompatible // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
+	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
 	golang.org/x/net v0.7.0 // indirect
+	golang.org/x/oauth2 v0.5.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect
 	golang.org/x/text v0.7.0 // indirect
+	google.golang.org/appengine v1.6.7 // indirect
 )

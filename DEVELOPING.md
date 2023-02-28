@@ -10,6 +10,7 @@ This page is intended to explain how to properly develop/test the application an
 * [golang](https://go.dev/doc/install)
 * [helm](https://helm.sh/docs/intro/install/)
 * [golang](https://go.dev/doc/install)
+* complete [local_setup](./local_setup.md)
 
 ***Note*** In macOS systems you need to isntall docker-desktop as opposed to docker which includes the docker daemon. You also need to disable buildkit as it will make your builds to fail. Simply disable by going into settings. 
 
@@ -23,9 +24,7 @@ This page is intended to explain how to properly develop/test the application an
 # Starting a development environment
 
 * run `make start-development-environment`
-* do the following step if you need to get access to the jaegger collector
-    * modify /etc/hosts in your machine and add the following line
-        `127.0.0.1 collector.observability.com`
+
 
 # Deploying a local copy of the application
 

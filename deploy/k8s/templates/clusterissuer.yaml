@@ -1,0 +1,24 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: pki
+spec:
+  acme:
+    email: fake@gmail.com
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      # Secret resource that will be used to store the account's private key.
+      name: pki
+    solvers:
+    # this solver handles example.org challenges
+    # and uses explicit credentials
+    - selector:
+        dnsZones:
+          - uzcatm-skylab.com
+      dns01:
+        route53:
+          region: us-east-1
+          accessKeyID: {{ .Values.awsAccessKeyID }}
+          secretAccessKeySecretRef:
+            name: aws-creds
+            key: secret-key

@@ -10,6 +10,8 @@ import (
 	v1 "github.com/muzcategui1106/kitchen-wizard/pkg/proto/v1"
 	grpc_middleware "github.com/muzcategui1106/kitchen-wizard/pkg/protocol/grpc/middleware"
 	rest_middleware "github.com/muzcategui1106/kitchen-wizard/pkg/protocol/rest/middleware"
+	"github.com/muzcategui1106/kitchen-wizard/pkg/util/oidc"
+	"github.com/muzcategui1106/kitchen-wizard/pkg/util/swagger"
 
 	empty "github.com/golang/protobuf/ptypes/empty"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
@@ -32,22 +34,23 @@ func NewApiGRPCServer(ctx context.Context, listener net.Listener, cfg Config) (*
 	return grpcServer, nil
 }
 
-func NewApiHTTPServer(ctx context.Context) (*http.Server, error) {
+func NewApiHTTPServer(ctx context.Context, cfg Config) (*http.Server, error) {
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 	gwMux := runtime.NewServeMux()
 	mux := http.NewServeMux()
-	rest_middleware.AddLogger(logger.Log, gwMux)
 
-	// add swagger
+	// creating oidc client and verifier
+	oauth2Config, verifier, err := oidc.CreateOIDCClient(ctx, cfg.OidcProviderConfig)
+	if err != nil {
+		return nil, err
+	}
+
 	mime.AddExtensionType(".svg", "image/svg+xml")
-
-	swaggerUIHandler := http.FileServer(http.Dir("./swagger-ui"))
-
-	swaggerUIPrefix := "/swagger-ui/"
 	mux.Handle("/", gwMux)
-	mux.Handle(swaggerUIPrefix, http.StripPrefix(swaggerUIPrefix, swaggerUIHandler))
+	mux.Handle(swagger.UIPrefix, http.StripPrefix(swagger.UIPrefix, swagger.Handler))
+	mux.Handle(oidc.CallbackURI, rest_middleware.NewCallbackHandler(oauth2Config, *verifier))
 
-	err := v1.RegisterApiHandlerFromEndpoint(ctx, gwMux, "localhost:9443", opts)
+	err = v1.RegisterApiHandlerFromEndpoint(ctx, gwMux, "localhost:9443", opts)
 	if err != nil {
 		return nil, err
 	}
@@ -55,13 +58,11 @@ func NewApiHTTPServer(ctx context.Context) (*http.Server, error) {
 	srv := &http.Server{
 		Addr: "0.0.0.0:8443",
 		Handler: rest_middleware.AddRequestID(
-			rest_middleware.AddLogger(logger.Log, mux)),
+			rest_middleware.AddLogger(logger.Log,
+				rest_middleware.AddOIDCAuth(oauth2Config, mux))),
 	}
 
 	return srv, nil
-}
-
-func serveSwagger(mux *http.ServeMux) {
 }
 
 func newKitchenWizardServer() *kitchenWizardService {

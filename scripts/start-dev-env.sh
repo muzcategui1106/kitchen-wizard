@@ -21,18 +21,30 @@ echo "creating kind cluster"
 sudo kind create cluster --config $SCRIPT_DIR/kind-config.yaml
 
 echo "applying contour ingress controllers"
-sudo kubectl apply -f https://projectcontour.io/quickstart/contour.yaml
-sudo kubectl patch daemonsets -n projectcontour envoy -p '{"spec":{"template":{"spec":{"nodeSelector":{"ingress-ready":"true"},"tolerations":[{"key":"node-role.kubernetes.io/control-plane","operator":"Equal","effect":"NoSchedule"},{"key":"node-role.kubernetes.io/master","operator":"Equal","effect":"NoSchedule"}]}}}}'
+kubectl apply -f https://projectcontour.io/quickstart/contour.yaml
+kubectl patch daemonsets -n projectcontour envoy -p '{"spec":{"template":{"spec":{"nodeSelector":{"ingress-ready":"true"},"tolerations":[{"key":"node-role.kubernetes.io/control-plane","operator":"Equal","effect":"NoSchedule"},{"key":"node-role.kubernetes.io/master","operator":"Equal","effect":"NoSchedule"}]}}}}'
 
 echo "installing cert-manager"
+kubectl create namespace cert-manager
+AWS_SECRET=`cat ~/.aws/credentials | grep secret | awk -F= '{print $NF}' | base64`
+kubectl apply -n cert-manager -f - <<EOF
+apiVersion: v1
+kind: Secret
+metadata:
+  name: aws-creds
+data:
+  secret-key: $AWS_SECRET
+EOF
+
 sudo kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.11.0/cert-manager.yaml
 echo "waiting 10 seconds for cert-manager to startup properly"
 sleep 10 
 
+
 echo "applying observability layer"
-sudo kubectl create namespace observability
-sudo kubectl create -f https://github.com/jaegertracing/jaeger-operator/releases/download/v1.42.0/jaeger-operator.yaml -n observability
-sudo kubectl apply -n observability -f - <<EOF
+kubectl create namespace observability
+kubectl create -f https://github.com/jaegertracing/jaeger-operator/releases/download/v1.42.0/jaeger-operator.yaml -n observability
+kubectl apply -n observability -f - <<EOF
 apiVersion: jaegertracing.io/v1
 kind: Jaeger
 metadata:
@@ -42,5 +54,5 @@ spec:
     annotations:
       kubernetes.io/ingress.class: contour
     hosts:
-    - collector.observability.com
+    - collector.observability.local.uzcatm-skylab.com
 EOF

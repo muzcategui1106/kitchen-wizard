@@ -1,12 +1,15 @@
 package middleware
 
 import (
+	"context"
 	"net/http"
 	"strings"
 	"time"
 
 	"go.uber.org/zap"
 )
+
+type ctxLogger struct{}
 
 // AddLogger logs request/response pair
 func AddLogger(logger *zap.Logger, h http.Handler) http.Handler {
@@ -36,9 +39,11 @@ func AddLogger(logger *zap.Logger, h http.Handler) http.Handler {
 		userAgent := r.UserAgent()
 		uri := strings.Join([]string{scheme, "://", r.Host, r.RequestURI}, "")
 
+		logger = logger.WithOptions(zap.Fields(zap.String("request-id", id)))
+		ctx = ContextWithLogger(ctx, logger)
+
 		// Log HTTP request
 		logger.Debug("request started",
-			zap.String("request-id", id),
 			zap.String("http-scheme", scheme),
 			zap.String("http-proto", proto),
 			zap.String("http-method", method),
@@ -49,11 +54,10 @@ func AddLogger(logger *zap.Logger, h http.Handler) http.Handler {
 
 		t1 := time.Now()
 
-		h.ServeHTTP(w, r)
+		h.ServeHTTP(w, r.WithContext(ctx))
 
 		// Log HTTP response
 		logger.Debug("request completed",
-			zap.String("request-id", id),
 			zap.String("http-scheme", scheme),
 			zap.String("http-proto", proto),
 			zap.String("http-method", method),
@@ -62,5 +66,19 @@ func AddLogger(logger *zap.Logger, h http.Handler) http.Handler {
 			zap.String("uri", uri),
 			zap.Float64("elapsed-ms", float64(time.Since(t1).Nanoseconds())/1000000.0),
 		)
+
 	})
+}
+
+// ContextWithLogger adds logger to context
+func ContextWithLogger(ctx context.Context, l *zap.Logger) context.Context {
+	return context.WithValue(ctx, ctxLogger{}, l)
+}
+
+// LoggerFromContext returns logger from context
+func LoggerFromContext(ctx context.Context) *zap.Logger {
+	if l, ok := ctx.Value(ctxLogger{}).(*zap.Logger); ok {
+		return l
+	}
+	return zap.L()
 }
