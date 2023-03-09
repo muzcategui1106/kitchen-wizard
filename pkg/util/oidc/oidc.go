@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	CallbackURI = "/v1/auth/oidc/callback"
+	CallbackURI = "/auth/v1/oidc/callback"
 )
 
 // ProviderConfig contains all the necessary configuration OIDC

@@ -46,9 +46,11 @@ func NewApiHTTPServer(ctx context.Context, cfg Config) (*http.Server, error) {
 	}
 
 	mime.AddExtensionType(".svg", "image/svg+xml")
-	mux.Handle("/", gwMux)
+	// TODO use a proper session key
+	authHandler := rest_middleware.NewAuthHandler(oauth2Config, *verifier, []byte("my-dummy-key"))
+	mux.Handle(rest_middleware.BaseAuthPathV1, authHandler)
+	mux.Handle("/api", gwMux)
 	mux.Handle(swagger.UIPrefix, http.StripPrefix(swagger.UIPrefix, swagger.Handler))
-	mux.Handle(oidc.CallbackURI, rest_middleware.NewCallbackHandler(oauth2Config, *verifier))
 
 	err = v1.RegisterApiHandlerFromEndpoint(ctx, gwMux, "localhost:9443", opts)
 	if err != nil {
@@ -59,7 +61,7 @@ func NewApiHTTPServer(ctx context.Context, cfg Config) (*http.Server, error) {
 		Addr: "0.0.0.0:8443",
 		Handler: rest_middleware.AddRequestID(
 			rest_middleware.AddLogger(logger.Log,
-				rest_middleware.AddOIDCAuth(oauth2Config, mux))),
+				authHandler.AuthenticationInterceptor(mux))),
 	}
 
 	return srv, nil

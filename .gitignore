@@ -5,3 +5,5 @@ googleapis
 grpc-gateway
 protobuf
 */gen
+google-*
+.vscode/*

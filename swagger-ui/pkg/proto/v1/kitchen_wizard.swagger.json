@@ -16,7 +16,7 @@
     "application/json"
   ],
   "paths": {
-    "/healthz": {
+    "/api/v1/healthz": {
       "get": {
         "summary": "Returns the health of th service",
         "operationId": "api_Healthz",

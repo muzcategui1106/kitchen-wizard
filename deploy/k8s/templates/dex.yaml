@@ -27,6 +27,13 @@ spec:
         name: dex
         command: ["/usr/local/bin/dex", "serve", "/etc/dex/cfg/config.yaml"]
 
+        env:
+        - name: LINKEDIN_APPLICATION_ID
+          value: 7869lp0zsijyab
+        
+        - name: LINKEDIN_CLIENT_SECRET
+          value: 4EFFp0iNGGBvftMh
+
         ports:
         - name: https
           containerPort: 5556
@@ -72,11 +79,23 @@ data:
     oauth2:
       skipApprovalScreen: true
 
+    connectors:
+      - type: linkedin
+        # Required field for connector id.
+        id: linkedin
+        # Required field for connector name.
+        name: LinkedIn
+        config:
+          # Credentials can be string literals or pulled from the environment.
+          clientID: $LINKEDIN_APPLICATION_ID
+          clientSecret: $LINKEDIN_CLIENT_SECRET
+          redirectURI: https://dex.dex.local.uzcatm-skylab.com/callback
+
     staticClients:
     - id: example-app
       redirectURIs:
-      - 'http://api.kitchen-wizard.local.uzcatm-skylab.com/v1/auth/oidc/callback'
-      - 'http://localhost:8443/v1/auth/oidc/callback'
+      - 'http://api.kitchen-wizard.local.uzcatm-skylab.com/auth/v1/oidc/callback'
+      - 'http://localhost:8443/auth/v1/oidc/callback'
       name: 'Example App'
       secret: ZXhhbXBsZS1hcHAtc2VjcmV0
 

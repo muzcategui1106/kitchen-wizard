@@ -23,7 +23,7 @@ func main() {
 	var OidcClientSecret string
 	var oidcRedirectURI string
 
-	flag.IntVar(&logLevel, "log-level", -1, "Global log level")
+	flag.IntVar(&logLevel, "log-level", 0, "Global log level")
 	flag.StringVar(&logTimeFormat, "log-time-format", "2006-01-02T15:04:05Z07:00",
 		"Print time format for logger e.g. 2006-01-02T15:04:05Z07:00")
 	flag.StringVar(&tracingCollectorAddress, "otp-collector-address", "http://collector-collector.observability.svc:14268/api/traces", "open tracing collector address")

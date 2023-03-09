@@ -25,7 +25,7 @@ service api {
   // Returns the health of th service
   rpc Healthz(google.protobuf.Empty) returns (HealthzResponse) {
     option (google.api.http) = {
-        get: "/healthz"
+        get: "/api/v1/healthz"
     };
 }
 }
