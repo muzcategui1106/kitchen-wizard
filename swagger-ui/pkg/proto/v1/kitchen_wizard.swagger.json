@@ -38,6 +38,29 @@
           "api"
         ]
       }
+    },
+    "/api/v1/logged-user": {
+      "get": {
+        "summary": "Returns the current logged user",
+        "operationId": "api_V1GetLoggedUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1V1UserInfoResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "api"
+        ]
+      }
     }
   },
   "definitions": {
@@ -77,6 +100,21 @@
         }
       },
       "title": "A HealthResponse messages indicates whether the service is healthy or not"
+    },
+    "v1V1UserInfoResponse": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        }
+      },
+      "title": "A V1UserInfoResponse messages indicates whether the service is healthy or not"
     }
   }
 }

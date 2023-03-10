@@ -27,11 +27,25 @@ service api {
     option (google.api.http) = {
         get: "/api/v1/healthz"
     };
-}
+  }
+
+  // Returns the current logged user
+  rpc V1GetLoggedUser(google.protobuf.Empty) returns (V1UserInfoResponse) {
+    option (google.api.http) = {
+        get: "/api/v1/logged-user"
+    };
+  }
 }
 
 // A HealthResponse messages indicates whether the service is healthy or not
 message HealthzResponse {
   // whether the service is healthy or not
   string result = 1;
+}
+
+// A V1UserInfoResponse messages indicates whether the service is healthy or not
+message V1UserInfoResponse {
+  string name = 1;
+  string email =  2;
+  string username = 3;
 }

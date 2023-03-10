@@ -13,12 +13,15 @@ import (
 	"github.com/muzcategui1106/kitchen-wizard/pkg/util/oidc"
 	"github.com/muzcategui1106/kitchen-wizard/pkg/util/swagger"
 
+	gooidc "github.com/coreos/go-oidc/v3/oidc"
 	empty "github.com/golang/protobuf/ptypes/empty"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/status"
 )
 
 type kitchenWizardService struct{}
@@ -49,7 +52,7 @@ func NewApiHTTPServer(ctx context.Context, cfg Config) (*http.Server, error) {
 	// TODO use a proper session key
 	authHandler := rest_middleware.NewAuthHandler(oauth2Config, *verifier, []byte("my-dummy-key"))
 	mux.Handle(rest_middleware.BaseAuthPathV1, authHandler)
-	mux.Handle("/api", gwMux)
+	mux.Handle("/api/", gwMux)
 	mux.Handle(swagger.UIPrefix, http.StripPrefix(swagger.UIPrefix, swagger.Handler))
 
 	err = v1.RegisterApiHandlerFromEndpoint(ctx, gwMux, "localhost:9443", opts)
@@ -79,6 +82,29 @@ func (service *kitchenWizardService) Healthz(ctx context.Context, in *empty.Empt
 	return &v1.HealthzResponse{
 		Result: "ok",
 	}, nil
+}
+
+// V1GetLoggedUser get the user from the current sessions
+func (service *kitchenWizardService) V1GetLoggedUser(ctx context.Context, in *empty.Empty) (*v1.V1UserInfoResponse, error) {
+	lg := ctxzap.Extract(ctx)
+	idTokenInterface := ctx.Value(rest_middleware.IDTokenKey)
+	if idTokenInterface == nil {
+		lg.Sugar().Error("id token not found in context")
+		return nil, grpc.Errorf(codes.Unauthenticated, "no authenticated user present")
+	}
+
+	idToken, ok := idTokenInterface.(*gooidc.IDToken)
+	if !ok {
+		lg.Sugar().Error("could not unmarshall id token from context")
+		return nil, status.Error(http.StatusInternalServerError, "could not extract id token from context")
+	}
+
+	return &v1.V1UserInfoResponse{
+		Name:     "",
+		Email:    "",
+		Username: idToken.Subject,
+	}, nil
+
 }
 
 func (service *kitchenWizardService) mustEmbedUnimplementedKitchenwizardServer() {}

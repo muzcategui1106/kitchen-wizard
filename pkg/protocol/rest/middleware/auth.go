@@ -1,19 +1,22 @@
 package middleware
 
 import (
-	"encoding/base32"
+	"context"
+	"encoding/gob"
 	"net/http"
-	"strings"
 
 	"github.com/muzcategui1106/kitchen-wizard/pkg/util"
 	"github.com/muzcategui1106/kitchen-wizard/pkg/util/oidc"
 	"github.com/muzcategui1106/kitchen-wizard/pkg/util/swagger"
 
 	gooidc "github.com/coreos/go-oidc/v3/oidc"
-	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
 	"golang.org/x/oauth2"
 )
+
+func init() {
+	gob.Register(&gooidc.IDToken{})
+}
 
 // constants for URL paths
 const (
@@ -22,8 +25,8 @@ const (
 
 // cookie and sesssion constants
 const (
-	id_token_key = "id_token"
-	sessionIDKey = "session-id"
+	IDTokenKey     = "id_token"
+	UserSessionKey = "user_session"
 )
 
 // variables for URL paths
@@ -44,10 +47,17 @@ type AuthHandler struct {
 
 // NewAuthHandler handles all authentication calls
 func NewAuthHandler(oauth2Config oauth2.Config, idTokenVerifier gooidc.IDTokenVerifier, sessionKey []byte) *AuthHandler {
+	sessionStore := sessions.NewCookieStore(sessionKey)
+	sessionStore.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   3600 * 8, // 8 hours
+		HttpOnly: true,
+	}
+
 	return &AuthHandler{
 		oauth2Config:    oauth2Config,
 		idTokenVerifier: idTokenVerifier,
-		sessionStore:    sessions.NewCookieStore(sessionKey),
+		sessionStore:    sessionStore,
 	}
 }
 
@@ -65,7 +75,7 @@ func (auh *AuthHandler) AuthenticationInterceptor(h http.Handler) http.Handler {
 			return
 		}
 
-		unauthenticatedPaths := []string{swagger.UIPrefix, oidc.CallbackURI, v1Login}
+		unauthenticatedPaths := []string{swagger.UIPrefix, oidc.CallbackURI, v1Login, "/api/v1/healthz"}
 		for _, path := range unauthenticatedPaths {
 			if r.URL.Path == path {
 				h.ServeHTTP(w, r)
@@ -74,20 +84,24 @@ func (auh *AuthHandler) AuthenticationInterceptor(h http.Handler) http.Handler {
 		}
 
 		// do not do login if a session ID has been extracted
-		sessioID, err := r.Cookie(sessionIDKey)
-		if err == nil {
-			session, err := auh.sessionStore.Get(r, sessioID.Value)
-			if err != nil {
-				logger.Sugar().Errorf("could not get or creae session due to %s", err)
-				goto doLogin
-			}
+		session, err := auh.sessionStore.Get(r, UserSessionKey)
+		if err != nil {
+			logger.Sugar().Errorf("could not get or create session due to %s", err)
+			goto doLogin
+		}
 
-			if session.IsNew {
+		if session.IsNew {
+			logger.Info("new sessions detected, redirecting to login")
+			goto doLogin
+		} else {
+			idToken, ok := session.Values[IDTokenKey]
+			if !ok {
+				logger.Sugar().Error("id token not found in session this should not happen, doing login")
 				goto doLogin
+			} else {
+				h.ServeHTTP(w, r.WithContext(context.WithValue(ctx, IDTokenKey, idToken)))
+				return
 			}
-
-			h.ServeHTTP(w, r)
-			return
 		}
 
 	doLogin:
@@ -127,7 +141,7 @@ func (auh *AuthHandler) handleOIDCCallback(w http.ResponseWriter, r *http.Reques
 	}
 
 	// Extract the ID Token from OAuth2 token.
-	rawIDToken, ok := oauth2Token.Extra(id_token_key).(string)
+	rawIDToken, ok := oauth2Token.Extra(IDTokenKey).(string)
 	if !ok {
 		logger.Sugar().Error("could not extract id token from request")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -155,10 +169,7 @@ func (auh *AuthHandler) handleOIDCCallback(w http.ResponseWriter, r *http.Reques
 	}
 
 	// create a session for the user
-	sessionID := strings.TrimRight(
-		base32.StdEncoding.EncodeToString(
-			securecookie.GenerateRandomKey(32)), "=")
-	session, err := auh.sessionStore.Get(r, sessionID)
+	session, err := auh.sessionStore.Get(r, UserSessionKey)
 	if err != nil {
 		logger.Sugar().Errorf("could not get session from session store. error was .... %s", err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -166,9 +177,14 @@ func (auh *AuthHandler) handleOIDCCallback(w http.ResponseWriter, r *http.Reques
 	}
 
 	// store the id token in the session
-	session.Values[idToken] = idToken
-	session.Save(r, w)
-	http.SetCookie(w, sessions.NewCookie(sessionIDKey, sessionID, &sessions.Options{}))
+	session.Values[IDTokenKey] = idToken
+	err = session.Save(r, w)
+	if err != nil {
+		logger.Sugar().Error("unable to save session due to ... %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	logger.Sugar().Infof("succesfully logged user with email %s and is verified %t", claims.Email, claims.Verified)
+	w.Write([]byte("user has logged in"))
 }
