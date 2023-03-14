@@ -1,8 +1,10 @@
 package middleware
 
 import (
-	"context"
 	"encoding/gob"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/muzcategui1106/kitchen-wizard/pkg/util"
@@ -25,8 +27,8 @@ const (
 
 // cookie and sesssion constants
 const (
+	UserSessionKey = "session_id"
 	IDTokenKey     = "id_token"
-	UserSessionKey = "user_session"
 )
 
 // variables for URL paths
@@ -94,12 +96,13 @@ func (auh *AuthHandler) AuthenticationInterceptor(h http.Handler) http.Handler {
 			logger.Info("new sessions detected, redirecting to login")
 			goto doLogin
 		} else {
-			idToken, ok := session.Values[IDTokenKey]
+			email, ok := session.Values[oidc.EmailKey]
 			if !ok {
-				logger.Sugar().Error("id token not found in session this should not happen, doing login")
+				logger.Sugar().Error("session")
 				goto doLogin
 			} else {
-				h.ServeHTTP(w, r.WithContext(context.WithValue(ctx, IDTokenKey, idToken)))
+				r.Header.Add(oidc.EmailKey, string(fmt.Sprintf("%v", email)))
+				h.ServeHTTP(w, r)
 				return
 			}
 		}
@@ -129,6 +132,9 @@ func (auh *AuthHandler) handleV1Login(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, auh.oauth2Config.AuthCodeURL(state, gooidc.Nonce(nonce)), http.StatusFound)
 }
 
+// TODO this function saves all user info and refresh token in session as cookies. This is not correct
+// we only need to pass the access token and we can store the rest in redis or a database or something along
+// those lines. However we do not want to complicate ourselves with this at the moment
 func (auh *AuthHandler) handleOIDCCallback(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	logger := LoggerFromContext(ctx)
@@ -161,12 +167,67 @@ func (auh *AuthHandler) handleOIDCCallback(w http.ResponseWriter, r *http.Reques
 		Email    string   `json:"email"`
 		Verified bool     `json:"email_verified"`
 		Groups   []string `json:"groups"`
+
+		GivenName  string `json:"given_name"`
+		FamilyName string `json:"family_name"`
 	}
 	if err := idToken.Claims(&claims); err != nil {
 		logger.Sugar().Errorf("could  not extract claims from idToken %v", idToken)
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
+
+	fmt.Println(oauth2Token.AccessToken)
+	fmt.Println(oauth2Token.Expiry)
+
+	// proceed to get the user's first and last name
+	req, err := http.NewRequest("GET", "https://api.linkedin.com/v2/userinfo", nil)
+	if err != nil {
+		logger.Sugar().Errorf("Error creating request to linkedin %s", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	res, err := auh.oauth2Config.Client(ctx, oauth2Token).Do(req)
+	if err != nil {
+		logger.Sugar().Errorf("Error sending request to linkedin %s", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	defer res.Body.Close()
+
+	// Read the response body and parse the JSON data into a User struct
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		logger.Sugar().Errorf("Error reading user response from linkedin %s", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	type FirstName struct {
+		Localized map[string]string `json:"localized"`
+	}
+
+	type LastName struct {
+		Localized map[string]string `json:"localized"`
+	}
+
+	type User struct {
+		FirstName FirstName `json:"firstName"`
+		LastName  LastName  `json:"lastName"`
+	}
+
+	var user User
+	err = json.Unmarshal(body, &user)
+	if err != nil {
+		logger.Sugar().Errorf("Error parsin json response from linkedin %s", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// Print the user's first name and last name
+	fmt.Println("First Name:", user.FirstName.Localized["en_US"])
+	fmt.Println("Last Name:", user.LastName.Localized["en_US"])
 
 	// create a session for the user
 	session, err := auh.sessionStore.Get(r, UserSessionKey)
@@ -177,7 +238,8 @@ func (auh *AuthHandler) handleOIDCCallback(w http.ResponseWriter, r *http.Reques
 	}
 
 	// store the id token in the session
-	session.Values[IDTokenKey] = idToken
+	session.Values[oidc.EmailKey] = claims.Email
+	session.Values[oidc.AccessTokenKey] = oauth2Token.AccessToken
 	err = session.Save(r, w)
 	if err != nil {
 		logger.Sugar().Error("unable to save session due to ... %v", err)

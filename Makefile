@@ -6,6 +6,7 @@ mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 current_dir := $(patsubst %/,%,$(dir $(mkfile_path)))
 BUF_VERSION:=v1.9.0
 SWAGGER_UI_VERSION:=v4.15.5
+LOCAL_DB_PASSWORD = $(shell kubectl get secret kitchenwizard.acid-minimal-cluster.credentials.postgresql.acid.zalan.do -o 'jsonpath={.data.password}' | base64 -d)
 
 start-development-environment:
 	./scripts/start-dev-env.sh
@@ -22,7 +23,11 @@ run-localhost: go-build
 	./bin/api --dex-provider-url "https://dex.dex.local.uzcatm-skylab.com" \
 	--oidc-client-id example-app \
 	--oidc-client-secret ZXhhbXBsZS1hcHAtc2VjcmV0 \
-	--oidc-redirect-url http://localhost:8443
+	--oidc-redirect-url "http://localhost:8443" \
+	--postgres-db-hostname localhost \
+	--postgres-db-username kitchenwizard \
+	--postgres-db-port "6432" \
+	--postgres-db-password $(LOCAL_DB_PASSWORD)
 
 build-local:
 	echo "building image"
@@ -33,7 +38,8 @@ deploy-local: build-local
 	kind load docker-image kitchen-wizard:local
 
 	echo "generating k8s manifests"
-	helm template development deploy/k8s/ --values deploy/k8s/values-local.yaml | kubectl apply -f /dev/stdin
+	DB_PASSWORD=`$(kubectl get secret postgres.acid-minimal-cluster.credentials.postgresql.acid.zalan.do -o 'jsonpath={.data.password}' | base64 -d)`
+	helm template development deploy/k8s/ --values deploy/k8s/values-local.yaml --set dbPassword="$DB_PASSWORD" | kubectl apply -f /dev/stdin
 	
 	echo "sleeping 5 seconds to ensure image has gotten to nodes"
 	sleep 5

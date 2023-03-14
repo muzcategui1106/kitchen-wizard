@@ -10,6 +10,7 @@ import (
 
 	"github.com/muzcategui1106/kitchen-wizard/pkg/api"
 	"github.com/muzcategui1106/kitchen-wizard/pkg/logger"
+	"github.com/muzcategui1106/kitchen-wizard/pkg/util/db/postgres"
 	"github.com/muzcategui1106/kitchen-wizard/pkg/util/oidc"
 	"github.com/muzcategui1106/kitchen-wizard/pkg/util/tracing"
 )
@@ -22,6 +23,10 @@ func main() {
 	var oidcClientID string
 	var OidcClientSecret string
 	var oidcRedirectURI string
+	var postgresDBHostname string
+	var postgresDBPort string
+	var postgresDbUsername string
+	var postgresDBPassword string
 
 	flag.IntVar(&logLevel, "log-level", 0, "Global log level")
 	flag.StringVar(&logTimeFormat, "log-time-format", "2006-01-02T15:04:05Z07:00",
@@ -31,16 +36,12 @@ func main() {
 	flag.StringVar(&oidcClientID, "oidc-client-id", os.Getenv("OIDC_CLIENT_ID"), "oidc client id to be used for openid flows")
 	flag.StringVar(&OidcClientSecret, "oidc-client-secret", os.Getenv("OIDC_CLIENT_SECRET"), "oidc client secret to be used for oauth flows")
 	flag.StringVar(&oidcRedirectURI, "oidc-redirect-url", os.Getenv("OIDC_REDIRECT_URL"), "the url with schema that we will use for call backs. Do not include URL path that is hardcoded by default to /v1/auth/oidc/callback")
-	flag.Parse()
+	flag.StringVar(&postgresDBHostname, "postgres-db-hostname", os.Getenv("POSTGRES_DB_HOSTNAME"), "the hostname of the postgres db")
+	flag.StringVar(&postgresDBPort, "postgres-db-port", os.Getenv("POSTGRES_DB_PORT"), "the port for the DB")
+	flag.StringVar(&postgresDbUsername, "postgres-db-username", "", "the username for postgres database")
+	flag.StringVar(&postgresDBPassword, "postgres-db-password", os.Getenv("POSTGRES_DB_PASSWORD"), "the psssword for the db. This should be passed as an environmental variable for security purposes")
 
-	apiConfig := api.Config{
-		OidcProviderConfig: oidc.ProviderConfig{
-			ProviderURL:      dexProviderURL,
-			OidcClientID:     oidcClientID,
-			OidcClientSecret: OidcClientSecret,
-			OidcRedirectURL:  oidcRedirectURI,
-		},
-	}
+	flag.Parse()
 
 	mainContext := context.Background()
 
@@ -50,6 +51,11 @@ func main() {
 
 	if err := tracing.InitJaegerTracer(mainContext, tracingCollectorAddress); err != nil {
 		logger.Log.Sugar().Warnf("could not setup tracing, erro was %v", err)
+	}
+
+	dbConn, err := postgres.NewClient(postgresDBHostname, postgresDBPort, postgresDbUsername, postgresDBPassword)
+	if err != nil {
+		logger.Log.Sugar().Fatal("exiting as it could not connecto to DB")
 	}
 
 	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", 9443))
@@ -65,6 +71,15 @@ func main() {
 	go grpcServer.Serve(lis)
 
 	// start http server
+	apiConfig := api.Config{
+		OidcProviderConfig: oidc.ProviderConfig{
+			ProviderURL:      dexProviderURL,
+			OidcClientID:     oidcClientID,
+			OidcClientSecret: OidcClientSecret,
+			OidcRedirectURL:  oidcRedirectURI,
+		},
+		DBConn: dbConn,
+	}
 	httpServer, err := api.NewApiHTTPServer(mainContext, apiConfig)
 	if err != nil {
 		log.Fatalf("could not initialize http server: %v", err)

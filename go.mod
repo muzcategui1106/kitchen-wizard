@@ -18,6 +18,7 @@ require (
 	github.com/go-jose/go-jose/v3 v3.0.0 // indirect
 	github.com/gorilla/securecookie v1.1.1 // indirect
 	github.com/gorilla/sessions v1.2.1 // indirect
+	github.com/lib/pq v1.10.7 // indirect
 	github.com/philips/go-bindata-assetfs v0.0.0-20150624150248-3dcc96556217 // indirect
 	github.com/philips/grpc-gateway-example v0.0.0-20170619012617-a269bcb5931c // indirect
 	github.com/pkg/errors v0.8.1 // indirect

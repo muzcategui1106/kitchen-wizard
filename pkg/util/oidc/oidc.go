@@ -10,6 +10,11 @@ import (
 
 const (
 	CallbackURI = "/auth/v1/oidc/callback"
+
+	EmailKey        = "email"
+	AccessTokenKey  = "access_token"
+	RefreshTokenKey = "refresh_token"
+	RawIdTokenKey   = "raw_id_token"
 )
 
 // ProviderConfig contains all the necessary configuration OIDC

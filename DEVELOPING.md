@@ -7,12 +7,14 @@ This page is intended to explain how to properly develop/test the application an
 * [Docker](https://docs.docker.com/get-docker/)
 * [kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)
 * [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
+* [psql](https://www.postgresql.org/docs/current/app-psql.html)
 * [golang](https://go.dev/doc/install)
 * [helm](https://helm.sh/docs/intro/install/)
 * [golang](https://go.dev/doc/install)
 * complete [local_setup](./local_setup.md)
 
 ***Note*** In macOS systems you need to isntall docker-desktop as opposed to docker which includes the docker daemon. You also need to disable buildkit as it will make your builds to fail. Simply disable by going into settings. 
+
 
 # getting your local IDE to be able to run the tests
 
@@ -29,3 +31,14 @@ This page is intended to explain how to properly develop/test the application an
 # Deploying a local copy of the application
 
 * run `make deploy-local VERSION=local`
+
+# Running in localhost (non kubernetees run)
+
+You may need to test something quickly that might not require you to deploy to your local kubernetes cluster. If this is the case simply do the following
+
+* on a random terminal leave the following command running
+     ```
+     export PGMASTER=$(kubectl get pods -o jsonpath={.items..metadata.name} -l application=spilo,cluster-name=acid-minimal-cluster,spilo-role=master -n default)
+     kubectl port-forward $PGMASTER 6432:5432 -n default
+     ```
+* run `make run-localhost`

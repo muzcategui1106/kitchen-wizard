@@ -9,3 +9,9 @@ jaegerCollectorURL: collector.observability.local.uzcatm-skylab.com
 dexURL: dex.dex.local.uzcatm-skylab.com
 
 awsAccessKeyID: AKIAZHDHU5LQIDB2DGHZ
+
+dbHostnameAndPort: "acid-minimal-cluster.default.svc"
+dbPort: "5432"
+dbUsername: postgres
+dbPassword: "passed-via-helm-command-line"
+

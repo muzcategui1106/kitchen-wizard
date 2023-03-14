@@ -31,6 +31,10 @@ spec:
           - --oidc-client-id=example-app 
           - --oidc-client-secret=ZXhhbXBsZS1hcHAtc2VjcmV0
           - --oidc-redirect-url=http://api.kitchen-wizard.local.uzcatm-skylab.com
+          - --postgres-db-hostname={{ .Values.dbHostname}}
+          - --postgres-db-port={{ .Values.dbPort}}
+          - --postgres-db-username={{ .Values.dbUsername }}
+          - --postgres-db-password={ .Values.dbPassword}}
           {{ end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}

@@ -2,6 +2,7 @@ package api
 
 import (
 	context "context"
+	"fmt"
 	"mime"
 	"net"
 	"net/http"
@@ -13,14 +14,13 @@ import (
 	"github.com/muzcategui1106/kitchen-wizard/pkg/util/oidc"
 	"github.com/muzcategui1106/kitchen-wizard/pkg/util/swagger"
 
-	gooidc "github.com/coreos/go-oidc/v3/oidc"
 	empty "github.com/golang/protobuf/ptypes/empty"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
@@ -39,7 +39,7 @@ func NewApiGRPCServer(ctx context.Context, listener net.Listener, cfg Config) (*
 
 func NewApiHTTPServer(ctx context.Context, cfg Config) (*http.Server, error) {
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
-	gwMux := runtime.NewServeMux()
+	gwMux := runtime.NewServeMux(grpc_middleware.WithOauth())
 	mux := http.NewServeMux()
 
 	// creating oidc client and verifier
@@ -87,22 +87,21 @@ func (service *kitchenWizardService) Healthz(ctx context.Context, in *empty.Empt
 // V1GetLoggedUser get the user from the current sessions
 func (service *kitchenWizardService) V1GetLoggedUser(ctx context.Context, in *empty.Empty) (*v1.V1UserInfoResponse, error) {
 	lg := ctxzap.Extract(ctx)
-	idTokenInterface := ctx.Value(rest_middleware.IDTokenKey)
-	if idTokenInterface == nil {
-		lg.Sugar().Error("id token not found in context")
-		return nil, grpc.Errorf(codes.Unauthenticated, "no authenticated user present")
+	fmt.Println("hello")
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		lg.Sugar().Error("could not retrieve metadata from context")
+		return nil, status.Error(http.StatusInternalServerError, "ould not retrieve metadata from context")
 	}
 
-	idToken, ok := idTokenInterface.(*gooidc.IDToken)
-	if !ok {
-		lg.Sugar().Error("could not unmarshall id token from context")
-		return nil, status.Error(http.StatusInternalServerError, "could not extract id token from context")
-	}
+	// we can assume this is correct as the metadata should include from the OIDC token. perhaps there is an easier
+	// way of doing this by relating an id token to user info in a database or redis cache. I dont know at the moment
+	emails := md.Get(oidc.EmailKey)
 
 	return &v1.V1UserInfoResponse{
-		Name:     "",
-		Email:    "",
-		Username: idToken.Subject,
+		// Name:     profile[0],
+		Email:    emails[0],
+		Username: "",
 	}, nil
 
 }
