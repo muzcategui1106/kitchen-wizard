@@ -57,15 +57,10 @@ spec:
     - collector.observability.local.uzcatm-skylab.com
 EOF
 
-##### postgress operator and instance #########
+##### postgres operator and instance #########
 # add repo for postgres-operator
 helm repo add postgres-operator-charts https://opensource.zalando.com/postgres-operator/charts/postgres-operator
 
 # install the postgres-operator
 helm install postgres-operator postgres-operator-charts/postgres-operator
-
-# create postgress instance
-git clone https://github.com/zalando/postgres-operator.git --depth 1
-kubectl create -f postgress-operator/manifests/minimal-postgres-manifest.yaml
-rm -rf postgress-operator
 ################################################
