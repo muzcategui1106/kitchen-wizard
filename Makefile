@@ -16,7 +16,7 @@ swagger-doc-generation:
 
 go-build: swagger-doc-generation
 	mkdir -p bin
-	go build -o ./bin
+	go build -o ./bin/api
 
 run-localhost: go-build
 	./bin/api --dex-provider-url "https://dex.dex.local.uzcatm-skylab.com" \

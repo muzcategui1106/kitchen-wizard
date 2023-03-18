@@ -31,6 +31,23 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/logged-user": {
+            "get": {
+                "description": "get the user from the current sessions by looking into the cookies",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "get the user from the current sessions",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
         }
     }
 }`

@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	CallbackURI = "/auth/v1/oidc/callback"
+	CallbackURI             = "/auth/v1/oidc/callback"
+	CallbackURIRelativePath = "/oidc/callback"
 
 	EmailKey        = "email"
 	AccessTokenKey  = "access_token"

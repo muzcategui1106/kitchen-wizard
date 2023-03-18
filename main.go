@@ -8,9 +8,12 @@ import (
 
 	"github.com/muzcategui1106/kitchen-wizard/pkg/api"
 	"github.com/muzcategui1106/kitchen-wizard/pkg/logger"
+	rest_middleware "github.com/muzcategui1106/kitchen-wizard/pkg/protocol/rest/middleware"
 	"github.com/muzcategui1106/kitchen-wizard/pkg/util/db/postgres"
 	"github.com/muzcategui1106/kitchen-wizard/pkg/util/oidc"
 	"github.com/muzcategui1106/kitchen-wizard/pkg/util/tracing"
+	"github.com/opentracing-contrib/go-gin/ginhttp"
+	"github.com/opentracing/opentracing-go"
 )
 
 func main() {
@@ -56,24 +59,37 @@ func main() {
 		logger.Log.Sugar().Fatal("exiting as it could not connecto to DB")
 	}
 
+	// create oidc provider config to enable oidc auth
+	// creating oidc client and verifier
+	oidcPorviderConfig := oidc.ProviderConfig{
+		ProviderURL:      dexProviderURL,
+		OidcClientID:     oidcClientID,
+		OidcClientSecret: OidcClientSecret,
+		OidcRedirectURL:  oidcRedirectURI,
+	}
+
+	oauth2Config, verifier, err := oidc.CreateOIDCClient(mainContext, oidcPorviderConfig)
+	if err != nil {
+		logger.Log.Sugar().Fatalf("could not start oidc providerConfig due to %s", err.Error())
+	}
+
 	// start http server
-	apiConfig := api.Config{
-		OidcProviderConfig: oidc.ProviderConfig{
-			ProviderURL:      dexProviderURL,
-			OidcClientID:     oidcClientID,
-			OidcClientSecret: OidcClientSecret,
-			OidcRedirectURL:  oidcRedirectURI,
-		},
+	apiConfig := api.ApiServerConfig{
 		DBConn: dbConn,
 	}
-	httpServer, err := api.NewApiHTTPServer(mainContext, apiConfig)
+	ApiServer, err := api.NewApiServer(
+		mainContext,
+		apiConfig,
+		api.WithMiddleware(rest_middleware.StructuredLogger(logger.Log)),
+		api.WithMiddleware(ginhttp.Middleware(opentracing.GlobalTracer())),
+		api.WithSessionManagement(),
+		api.WithOIDCAuth(oauth2Config, *verifier),
+	)
 	if err != nil {
 		log.Fatalf("could not initialize http server: %v", err)
 	}
 	go func() {
-		if serverErr := httpServer.Run("0.0.0.0:8443"); serverErr != nil {
-			log.Fatal(serverErr)
-		}
+		ApiServer.Run(mainContext)
 	}()
 
 	// run forerver

@@ -9,8 +9,9 @@ WORKDIR /app
 # copy the project
 COPY go.mod go.mod
 COPY go.sum go.sum
-COPY cmd cmd
+COPY main.go main.go
 COPY pkg pkg
+COPY scripts scripts
 COPY Makefile Makefile
 
 # setting path

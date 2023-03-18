@@ -12,4 +12,15 @@ paths:
       summary: healthz asserts that the server is running
       tags:
       - example
+  /logged-user:
+    get:
+      description: get the user from the current sessions by looking into the cookies
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: get the user from the current sessions
+      tags:
+      - users
 swagger: "2.0"

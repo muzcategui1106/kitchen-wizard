@@ -2,9 +2,7 @@ package middleware
 
 import (
 	"encoding/gob"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -38,12 +36,11 @@ func init() {
 
 // cookie and sesssion constants
 const (
-	UserSessionKey = "session_id"
-	IDTokenKey     = "id_token"
+	IDTokenKey = "id_token"
 )
 
-type V1LogiResponse struct {
-	OK bool `json:"ok"`
+type V1LoginResponse struct {
+	Ok bool `json:"ok"`
 }
 
 // AuthHandler is used to handle oidc callback workflow
@@ -67,7 +64,7 @@ func NewAuthHandler(oauth2Config oauth2.Config, idTokenVerifier gooidc.IDTokenVe
 func (auh *AuthHandler) AddAuthHandling(r *gin.Engine) {
 	authGroup := r.Group(authBasePath + versionV1)
 	authGroup.Any(login, auh.handleV1Login())
-	authGroup.POST(oidc.CallbackURI, auh.handleOIDCCallback())
+	authGroup.GET(oidc.CallbackURIRelativePath, auh.handleOIDCCallback())
 }
 
 // AuthenticationInterceptor adds oidc authentication workflow on all http handlers except healthz
@@ -92,7 +89,7 @@ func (auh *AuthHandler) AuthenticationInterceptor() gin.HandlerFunc {
 		}
 
 		// do not do login if a session ID has been extracted
-		session := sessions.DefaultMany(ctx, UserSessionKey)
+		session := sessions.Default(ctx)
 		email := session.Get(oidc.EmailKey)
 		if email == nil {
 			logger.Sugar().Error("could not get session from request. redirecting to login")
@@ -124,12 +121,11 @@ func (auh *AuthHandler) handleOIDCCallback() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		logger := LoggerFromContext(ctx)
 
-		codeAny, exists := ctx.Get("code")
-		if !exists {
+		code := ctx.Query("code")
+		if code == "" {
 			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "oidc did not return a code query parameter"})
 			return
 		}
-		code := codeAny.(string)
 
 		oauth2Token, err := auh.oauth2Config.Exchange(ctx, string(code))
 		if err != nil {
@@ -169,60 +165,8 @@ func (auh *AuthHandler) handleOIDCCallback() gin.HandlerFunc {
 			return
 		}
 
-		fmt.Println(oauth2Token.AccessToken)
-		fmt.Println(oauth2Token.Expiry)
-
-		// proceed to get the user's first and last name
-		req, err := http.NewRequest("GET", "https://api.linkedin.com/v2/userinfo", nil)
-		if err != nil {
-			logger.Sugar().Errorf("Error creating request to linkedin %s", err)
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating request to linkedin"})
-			return
-		}
-
-		res, err := auh.oauth2Config.Client(ctx, oauth2Token).Do(req)
-		if err != nil {
-			logger.Sugar().Errorf("Error sending request to linkedin %s", err)
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error sending request to linkedin"})
-			return
-		}
-		defer res.Body.Close()
-
-		// Read the response body and parse the JSON data into a User struct
-		body, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			logger.Sugar().Errorf("Error reading user response from linkedin %s", err)
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error reading user response from linkedin"})
-			return
-		}
-
-		type FirstName struct {
-			Localized map[string]string `json:"localized"`
-		}
-
-		type LastName struct {
-			Localized map[string]string `json:"localized"`
-		}
-
-		type User struct {
-			FirstName FirstName `json:"firstName"`
-			LastName  LastName  `json:"lastName"`
-		}
-
-		var user User
-		err = json.Unmarshal(body, &user)
-		if err != nil {
-			logger.Sugar().Errorf("Error parsin json response from linkedin %s", err)
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error parsin json response from linkedin"})
-			return
-		}
-
-		// Print the user's first name and last name
-		fmt.Println("First Name:", user.FirstName.Localized["en_US"])
-		fmt.Println("Last Name:", user.LastName.Localized["en_US"])
-
 		// do not do login if a session ID has been extracted
-		session := sessions.DefaultMany(ctx, UserSessionKey)
+		session := sessions.Default(ctx)
 
 		// store the id token in the session
 		session.Set(oidc.EmailKey, claims.Email)
@@ -235,6 +179,6 @@ func (auh *AuthHandler) handleOIDCCallback() gin.HandlerFunc {
 		}
 
 		logger.Sugar().Infof("succesfully logged user with email %s and is verified %t", claims.Email, claims.Verified)
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "unable to save session"})
+		ctx.JSON(http.StatusOK, &V1LoginResponse{Ok: true})
 	}
 }

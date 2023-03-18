@@ -12,6 +12,6 @@ const UIPrefix = "/swagger-ui/"
 
 // AddSwagger enables swagger for a gin router under /swagger-ui/swagger endopint
 func AddSwagger(r *gin.Engine) {
-	docs.SwaggerInfo.BasePath = "/swagger-ui"
+	docs.SwaggerInfo.BasePath = "/api/v1"
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 }
