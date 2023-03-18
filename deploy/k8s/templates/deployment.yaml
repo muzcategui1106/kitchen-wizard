@@ -42,8 +42,5 @@ spec:
             - name: https
               containerPort: 8443
               protocol: TCP
-            - name: grpc
-              containerPort: 9443
-              protocol: TCP
           resources:
 {{ toYaml .Values.resources | indent 12 }}

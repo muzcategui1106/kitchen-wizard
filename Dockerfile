@@ -6,25 +6,15 @@ RUN apk add g++ && apk add make
 # Download necessary Go modules
 WORKDIR /app
 
-# pre install dependnecies so that changes in code does not trigger a reinstall as the layer is already built
-RUN go install github.com/bufbuild/buf/cmd/buf@v1.9.0
-
 # copy the project
 COPY go.mod go.mod
 COPY go.sum go.sum
 COPY cmd cmd
 COPY pkg pkg
 COPY Makefile Makefile
-COPY buf.yaml  buf.yaml
-COPY buf.gen.yaml buf.gen.yaml
-COPY buf.lock buf.lock
-COPY swagger-ui /swagger-ui
 
 # setting path
 RUN export PATH="$PATH:$GOPATH/bin"
-
-# generate grpc deps
-RUN make grpc-build
 
 # get dependencies
 RUN go mod download

@@ -3,9 +3,7 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"log"
-	"net"
 	"os"
 
 	"github.com/muzcategui1106/kitchen-wizard/pkg/api"
@@ -58,18 +56,6 @@ func main() {
 		logger.Log.Sugar().Fatal("exiting as it could not connecto to DB")
 	}
 
-	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", 9443))
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
-
-	// start grpc server
-	grpcServer, err := api.NewApiGRPCServer(mainContext, lis, api.Config{})
-	if err != nil {
-		log.Fatalf("could not initialize grpc server: %v", err)
-	}
-	go grpcServer.Serve(lis)
-
 	// start http server
 	apiConfig := api.Config{
 		OidcProviderConfig: oidc.ProviderConfig{
@@ -84,7 +70,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not initialize http server: %v", err)
 	}
-	go httpServer.ListenAndServe()
+	go func() {
+		if serverErr := httpServer.Run("0.0.0.0:8443"); serverErr != nil {
+			log.Fatal(serverErr)
+		}
+	}()
 
 	// run forerver
 	stop := make(chan struct{}, 1)

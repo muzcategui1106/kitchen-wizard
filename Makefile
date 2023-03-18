@@ -4,20 +4,19 @@ GIT_REF = $(shell git describe --tags --exact-match 2>/dev/null || git rev-parse
 VERSION ?= $(GIT_REF)
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 current_dir := $(patsubst %/,%,$(dir $(mkfile_path)))
-BUF_VERSION:=v1.9.0
+BUF_VERSION:=v1.15.0
 SWAGGER_UI_VERSION:=v4.15.5
 LOCAL_DB_PASSWORD = $(shell kubectl get secret kitchenwizard.acid-minimal-cluster.credentials.postgresql.acid.zalan.do -o 'jsonpath={.data.password}' | base64 -d)
 
 start-development-environment:
 	./scripts/start-dev-env.sh
 
-grpc-build:
-	go run github.com/bufbuild/buf/cmd/buf@$(BUF_VERSION) mod update
-	go run github.com/bufbuild/buf/cmd/buf@$(BUF_VERSION) generate
+swagger-doc-generation:
+	./scripts/swagger-docs-generate.sh 
 
-go-build:
+go-build: swagger-doc-generation
 	mkdir -p bin
-	cd cmd/api; go build -o ../../bin
+	go build -o ./bin
 
 run-localhost: go-build
 	./bin/api --dex-provider-url "https://dex.dex.local.uzcatm-skylab.com" \

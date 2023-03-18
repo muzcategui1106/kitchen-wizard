@@ -1,0 +1,15 @@
+info:
+  contact: {}
+paths:
+  /healthz:
+    get:
+      description: do ping
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: healthz asserts that the server is running
+      tags:
+      - example
+swagger: "2.0"
