@@ -38,7 +38,7 @@ deploy-local: build-local
 
 	echo "generating k8s manifests"
 	DB_PASSWORD=`$(kubectl get secret postgres.acid-minimal-cluster.credentials.postgresql.acid.zalan.do -o 'jsonpath={.data.password}' | base64 -d)`
-	helm template development deploy/k8s/ --values deploy/k8s/values-local.yaml --set dbPassword="$DB_PASSWORD" | kubectl apply -f /dev/stdin
+	helm template development deploy/k8s/ --values deploy/k8s/values-local.yaml --set dbPassword=$(LOCAL_DB_PASSWORD) | kubectl apply -f /dev/stdin
 	
 	echo "sleeping 5 seconds to ensure image has gotten to nodes"
 	sleep 5

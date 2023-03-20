@@ -1,24 +1,29 @@
-
 FROM golang:1.20.0-alpine as build
 
 RUN apk add g++ && apk add make
-
-# Download necessary Go modules
-WORKDIR /app
-
-# copy the project
-COPY go.mod go.mod
-COPY go.sum go.sum
-COPY main.go main.go
-COPY pkg pkg
-COPY scripts scripts
-COPY Makefile Makefile
+RUN apk update && apk add bash
+RUN apk update && apk add rsync
 
 # setting path
 RUN export PATH="$PATH:$GOPATH/bin"
 
-# get dependencies
+# Download necessary Go modules
+WORKDIR /app
+
+# copy scripts so we can just warm up swag dependencies so that minor code changes do not retrigger a full build all the time
+COPY scripts scripts
+RUN scripts/get-swag-dependencies.sh
+
+# copy go.mod and go.sum so we can just warm up swag dependencies so that minor code changes do not retrigger a full build all the time
+COPY go.mod go.mod
+COPY go.sum go.sum
 RUN go mod download
+
+# copy the project code
+COPY main.go main.go
+COPY pkg pkg
+COPY scripts scripts
+COPY Makefile Makefile
 
 # build code
 RUN make go-build
@@ -31,7 +36,6 @@ RUN make go-build
 FROM golang:1.20.0-alpine AS final
 
 WORKDIR /
-COPY --from=build  /app/swagger-ui /swagger-ui
 COPY --from=build /app/bin/api /api
 
 

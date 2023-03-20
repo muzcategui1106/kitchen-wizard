@@ -10,8 +10,8 @@ dexURL: dex.dex.local.uzcatm-skylab.com
 
 awsAccessKeyID: AKIAZHDHU5LQIDB2DGHZ
 
-dbHostnameAndPort: "acid-minimal-cluster.default.svc"
+dbHostname: "acid-minimal-cluster.default.svc"
 dbPort: "5432"
-dbUsername: postgres
+dbUsername: kitchenwizard
 dbPassword: "passed-via-helm-command-line"
 

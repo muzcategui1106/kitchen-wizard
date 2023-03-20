@@ -19,6 +19,7 @@ fi
 
 echo "creating kind cluster"
 sudo kind create cluster --config $SCRIPT_DIR/kind-config.yaml
+sudo cp /root/.kube/config ~/.kube/config
 
 echo "applying contour ingress controllers"
 kubectl apply -f https://projectcontour.io/quickstart/contour.yaml

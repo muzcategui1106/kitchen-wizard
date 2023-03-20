@@ -16,7 +16,7 @@ const (
 func NewClient(dbHost, dbPort, username, password string) (*sql.DB, error) {
 	logger := logger.Log
 
-	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=require",
 		dbHost, dbPort, username, password, defaultDBName)
 
 	fmt.Println(connStr)
