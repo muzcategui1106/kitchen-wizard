@@ -7,13 +7,12 @@ import (
 	"os"
 
 	"github.com/muzcategui1106/kitchen-wizard/pkg/api"
+	"github.com/muzcategui1106/kitchen-wizard/pkg/db/model"
 	"github.com/muzcategui1106/kitchen-wizard/pkg/logger"
 	rest_middleware "github.com/muzcategui1106/kitchen-wizard/pkg/protocol/rest/middleware"
 	"github.com/muzcategui1106/kitchen-wizard/pkg/util/db/postgres"
 	"github.com/muzcategui1106/kitchen-wizard/pkg/util/oidc"
 	"github.com/muzcategui1106/kitchen-wizard/pkg/util/tracing"
-	"github.com/opentracing-contrib/go-gin/ginhttp"
-	"github.com/opentracing/opentracing-go"
 )
 
 func main() {
@@ -58,6 +57,9 @@ func main() {
 	if err != nil {
 		logger.Log.Sugar().Fatal("exiting as it could not connecto to DB")
 	}
+	if err = model.AutoMigrateSchemas(dbConn); err != nil {
+		logger.Log.Sugar().Fatal(err)
+	}
 
 	// create oidc provider config to enable oidc auth
 	// creating oidc client and verifier
@@ -81,7 +83,7 @@ func main() {
 		mainContext,
 		apiConfig,
 		api.WithMiddleware(rest_middleware.StructuredLogger(logger.Log)),
-		api.WithMiddleware(ginhttp.Middleware(opentracing.GlobalTracer())),
+		api.WithTracing(),
 		api.WithSessionManagement(),
 		api.WithOIDCAuth(oauth2Config, *verifier),
 	)

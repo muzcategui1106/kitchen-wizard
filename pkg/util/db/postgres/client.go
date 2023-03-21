@@ -1,11 +1,12 @@
 package postgres
 
 import (
-	"database/sql"
 	"fmt"
 
 	_ "github.com/lib/pq"
 	"github.com/muzcategui1106/kitchen-wizard/pkg/logger"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 const (
@@ -13,7 +14,7 @@ const (
 )
 
 // NewClient creates a new client that connects to postgress DB
-func NewClient(dbHost, dbPort, username, password string) (*sql.DB, error) {
+func NewClient(dbHost, dbPort, username, password string) (*gorm.DB, error) {
 	logger := logger.Log
 
 	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=require",
@@ -22,17 +23,9 @@ func NewClient(dbHost, dbPort, username, password string) (*sql.DB, error) {
 	fmt.Println(connStr)
 
 	// Open a database connection
-	db, err := sql.Open("postgres", connStr)
+	db, err := gorm.Open(postgres.Open(connStr), &gorm.Config{})
 	if err != nil {
 		logger.Sugar().Errorf("unable to open sql connection due to %s", err)
-		return nil, err
-	}
-	defer db.Close()
-
-	// Test the connection
-	err = db.Ping()
-	if err != nil {
-		logger.Sugar().Errorf("could not ping db due to %s", err)
 		return nil, err
 	}
 

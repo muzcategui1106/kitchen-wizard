@@ -5,9 +5,10 @@ import (
 
 	"github.com/muzcategui1106/kitchen-wizard/pkg/logger"
 	"github.com/opentracing/opentracing-go"
-	"github.com/uber/jaeger-client-go"
+	jaeger "github.com/uber/jaeger-client-go"
 	jaegercfg "github.com/uber/jaeger-client-go/config"
 	jaegerlog "github.com/uber/jaeger-client-go/log"
+	"github.com/uber/jaeger-client-go/zipkin"
 	"github.com/uber/jaeger-lib/metrics"
 )
 
@@ -31,12 +32,16 @@ func InitJaegerTracer(ctx context.Context, collectorAddress string) error {
 	// frameworks.
 	jLogger := jaegerlog.StdLogger
 	jMetricsFactory := metrics.NullFactory
+	propagator := zipkin.NewZipkinB3HTTPHeaderPropagator()
 
-	// Initialize tracer with a logger and a metrics factory
 	tracer, closer, err := cfg.NewTracer(
 		jaegercfg.Logger(jLogger),
 		jaegercfg.Metrics(jMetricsFactory),
+		jaegercfg.Extractor(opentracing.HTTPHeaders, propagator),
+		jaegercfg.Injector(opentracing.HTTPHeaders, propagator),
+		jaegercfg.ZipkinSharedRPCSpan(true),
 	)
+
 	if err != nil {
 		return err
 	}

@@ -1,26 +1,27 @@
 package api
 
 import (
-	"database/sql"
-
 	gooidc "github.com/coreos/go-oidc/v3/oidc"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	rest_middleware "github.com/muzcategui1106/kitchen-wizard/pkg/protocol/rest/middleware"
+	"github.com/opentracing-contrib/go-gin/ginhttp"
+	"github.com/opentracing/opentracing-go"
 	"golang.org/x/oauth2"
+	"gorm.io/gorm"
 )
 
 type ApiServerOption func(s *ApiServer)
 
 type ApiServerConfig struct {
-	DBConn *sql.DB
+	DBConn *gorm.DB
 }
 
 // ApiServer represents a kitchenwizard api server
 type ApiServer struct {
 	engine  *gin.Engine
-	dbConn  *sql.DB
+	dbConn  *gorm.DB
 	address string
 }
 
@@ -44,5 +45,14 @@ func WithOIDCAuth(oauth2Config oauth2.Config, idTokenVerifier gooidc.IDTokenVeri
 	return func(s *ApiServer) {
 		s.engine.Use(authHandler.AuthenticationInterceptor())
 		authHandler.AddAuthHandling(s.engine)
+	}
+}
+
+func WithTracing() ApiServerOption {
+	return func(s *ApiServer) {
+		s.engine.Use(ginhttp.Middleware(
+			opentracing.GlobalTracer(),
+			ginhttp.MWComponentName("api"),
+		))
 	}
 }

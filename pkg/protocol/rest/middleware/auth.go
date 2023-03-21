@@ -63,7 +63,7 @@ func NewAuthHandler(oauth2Config oauth2.Config, idTokenVerifier gooidc.IDTokenVe
 
 func (auh *AuthHandler) AddAuthHandling(r *gin.Engine) {
 	authGroup := r.Group(authBasePath + versionV1)
-	authGroup.Any(login, auh.handleV1Login())
+	authGroup.GET(login, auh.handleV1Login())
 	authGroup.GET(oidc.CallbackURIRelativePath, auh.handleOIDCCallback())
 }
 
