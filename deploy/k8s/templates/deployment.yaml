@@ -21,6 +21,12 @@ spec:
         app: api
         release: {{ .Release.Name }}
     spec:
+      {{ if .Values.isLocal }}
+      hostAliases:
+        - ip: {{ .Values.localInterfaceIP }}
+          hostnames:
+          - "dex.dex.local.uzcatm-skylab.com"
+      {{ end }}
       containers:
         - name: {{ .Chart.Name }}
           command:
@@ -44,3 +50,4 @@ spec:
               protocol: TCP
           resources:
 {{ toYaml .Values.resources | indent 12 }}
+

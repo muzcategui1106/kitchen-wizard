@@ -15,3 +15,7 @@ dbPort: "5432"
 dbUsername: kitchenwizard
 dbPassword: "passed-via-helm-command-line"
 
+
+# this value is used for applications that need to communicate with services that translate to localhost. This is done so the developer can work in and out of k8s
+localInterfaceIP: "value determined by make file"
+
