@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/muzcategui1106/kitchen-wizard/pkg/db/model"
@@ -11,7 +12,8 @@ import (
 
 // api paths
 const (
-	ingredientCRUDPath = "ingredient"
+	ingredientCRUDURI  = "ingredient"
+	listIngredientsURI = "ingredients"
 )
 
 // @BasePath /api/v1
@@ -41,5 +43,39 @@ func (s *ApiServer) V1CreateIngredient() gin.HandlerFunc {
 		}
 
 		ctx.JSON(http.StatusOK, &IngredientCrudResponse{IsCreated: true})
+	}
+}
+
+// @BasePath /api/v1
+// V1ListIngredients godoc
+// @Summary list ingredients
+// @Schemes
+// @Description list ingredients. By default it list the first 10 ingredients. Maximum number of ingredients to list is 100
+// @Tags ingredient
+// @Produce json
+// @Param	numItems	query	int  true  "number of elements to list. max 100"
+// @Success 200 {array}  model.Ingredient
+// @Router /ingredients [get]
+func (s *ApiServer) V1ListIngredients() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		lg := logger.Log
+		numItems, err := strconv.Atoi(ctx.DefaultQuery("numItems", "10"))
+		if err != nil {
+			lg.Sugar().Debug("incorrect query paremeter passed for numItems defaulting to 10")
+			numItems = 10
+		}
+
+		if numItems > 100 || numItems < 0 {
+			numItems = 10
+		}
+
+		ingredients, err := s.ingredientRepository.First(ctx, numItems)
+		if err != nil {
+			lg.Sugar().Errorf("could not create entry in db due to ... %v", err)
+			ctx.AbortWithStatusJSON(http.StatusNotAcceptable, ErrorResponse{Code: http.StatusNotAcceptable, Error: err.Error()})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, ingredients)
 	}
 }

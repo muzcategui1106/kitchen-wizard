@@ -13,7 +13,7 @@ type IIngredient interface {
 	Create(context.Context, *model.Ingredient) error
 
 	// returns the first X ingredients sort by alphabetical order
-	First(context.Context, int) ([]Ingredient, error)
+	First(context.Context, int) ([]model.Ingredient, error)
 }
 
 type Ingredient struct {
@@ -30,8 +30,8 @@ func (repo *Ingredient) Create(ctx context.Context, i *model.Ingredient) error {
 	return repo.db.WithContext(ctx).Create(i).Error
 }
 
-func (repo *Ingredient) First(ctx context.Context, limit int) ([]Ingredient, error) {
-	var ingredients []Ingredient
-	result := repo.db.WithContext(ctx).Limit(limit).Find(&ingredients).Order("name")
+func (repo *Ingredient) First(ctx context.Context, limit int) ([]model.Ingredient, error) {
+	var ingredients []model.Ingredient
+	result := repo.db.WithContext(ctx).Limit(limit).Find(&ingredients)
 	return ingredients, result.Error
 }

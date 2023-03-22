@@ -67,6 +67,38 @@ const docTemplate = `{
                 }
             }
         },
+        "/ingredients": {
+            "get": {
+                "description": "list ingredients. By default it list the first 10 ingredients. Maximum number of ingredients to list is 100",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ingredient"
+                ],
+                "summary": "list ingredients",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "number of elements to list. max 100",
+                        "name": "numItems",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Ingredient"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/logged-user": {
             "get": {
                 "description": "get the user from the current sessions by looking into the cookies",
@@ -126,15 +158,7 @@ const docTemplate = `{
             }
         },
         "model.Ingredient": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
+            "type": "object"
         }
     }
 }`

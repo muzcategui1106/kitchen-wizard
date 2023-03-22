@@ -23,11 +23,6 @@ definitions:
         type: string
     type: object
   model.Ingredient:
-    properties:
-      description:
-        type: string
-      name:
-        type: string
     type: object
 info:
   contact: {}
@@ -63,6 +58,28 @@ paths:
           schema:
             $ref: '#/definitions/api.IngredientCrudResponse'
       summary: creates a new ingredient to be used for recipes
+      tags:
+      - ingredient
+  /ingredients:
+    get:
+      description: list ingredients. By default it list the first 10 ingredients.
+        Maximum number of ingredients to list is 100
+      parameters:
+      - description: number of elements to list. max 100
+        in: query
+        name: numItems
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Ingredient'
+            type: array
+      summary: list ingredients
       tags:
       - ingredient
   /logged-user:

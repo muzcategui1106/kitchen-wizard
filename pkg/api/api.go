@@ -46,7 +46,8 @@ func NewApiServer(ctx context.Context, cfg ApiServerConfig, opts ...ApiServerOpt
 	{
 		apiV1.GET(healthz, V1Healthz())
 		apiV1.GET(loggedUserPath, s.V1GetLoggedUser())
-		apiV1.POST(ingredientCRUDPath, s.V1CreateIngredient())
+		apiV1.GET(listIngredientsURI, s.V1ListIngredients())
+		apiV1.POST(ingredientCRUDURI, s.V1CreateIngredient())
 	}
 
 	return s, nil
