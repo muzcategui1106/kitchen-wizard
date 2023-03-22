@@ -1,3 +1,34 @@
+definitions:
+  api.HealthzResponse:
+    properties:
+      ok:
+        type: boolean
+    type: object
+  api.IngredientCrudResponse:
+    properties:
+      isCreated:
+        type: boolean
+      isDeleted:
+        type: boolean
+      isUpdated:
+        type: boolean
+    type: object
+  api.User:
+    properties:
+      email:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+    type: object
+  model.Ingredient:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    type: object
 info:
   contact: {}
 paths:
@@ -9,9 +40,31 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/api.HealthzResponse'
       summary: healthz asserts that the server is running
       tags:
       - example
+  /ingredient:
+    post:
+      description: creates a new ingredient to be used for recipes
+      parameters:
+      - description: Ingredient to be created
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.Ingredient'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.IngredientCrudResponse'
+      summary: creates a new ingredient to be used for recipes
+      tags:
+      - ingredient
   /logged-user:
     get:
       description: get the user from the current sessions by looking into the cookies
@@ -20,7 +73,9 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/api.User'
       summary: get the user from the current sessions
       tags:
-      - users
+      - user
 swagger: "2.0"

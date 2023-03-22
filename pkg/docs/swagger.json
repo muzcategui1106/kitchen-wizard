@@ -16,7 +16,41 @@
                 "summary": "healthz asserts that the server is running",
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.HealthzResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/ingredient": {
+            "post": {
+                "description": "creates a new ingredient to be used for recipes",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ingredient"
+                ],
+                "summary": "creates a new ingredient to be used for recipes",
+                "parameters": [
+                    {
+                        "description": "Ingredient to be created",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Ingredient"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.IngredientCrudResponse"
+                        }
                     }
                 }
             }
@@ -28,13 +62,65 @@
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "user"
                 ],
                 "summary": "get the user from the current sessions",
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.User"
+                        }
                     }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "api.HealthzResponse": {
+            "type": "object",
+            "properties": {
+                "ok": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "api.IngredientCrudResponse": {
+            "type": "object",
+            "properties": {
+                "isCreated": {
+                    "type": "boolean"
+                },
+                "isDeleted": {
+                    "type": "boolean"
+                },
+                "isUpdated": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "api.User": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Ingredient": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         }

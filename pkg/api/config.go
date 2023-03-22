@@ -5,6 +5,7 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	"github.com/muzcategui1106/kitchen-wizard/pkg/db/repository"
 	rest_middleware "github.com/muzcategui1106/kitchen-wizard/pkg/protocol/rest/middleware"
 	"github.com/opentracing-contrib/go-gin/ginhttp"
 	"github.com/opentracing/opentracing-go"
@@ -20,9 +21,9 @@ type ApiServerConfig struct {
 
 // ApiServer represents a kitchenwizard api server
 type ApiServer struct {
-	engine  *gin.Engine
-	dbConn  *gorm.DB
-	address string
+	engine               *gin.Engine
+	ingredientRepository repository.IIngredient
+	address              string
 }
 
 func WithSessionManagement() ApiServerOption {

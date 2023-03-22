@@ -19,9 +19,9 @@ const (
 // @Summary get the user from the current sessions
 // @Schemes
 // @Description get the user from the current sessions by looking into the cookies
-// @Tags users
+// @Tags user
 // @Produce json
-// @Success 200
+// @Success 200 {object} User
 // @Router /logged-user [get]
 // V1GetLoggedUser get the user from the current sessions
 func (s *ApiServer) V1GetLoggedUser() gin.HandlerFunc {

@@ -4,6 +4,7 @@ import (
 	context "context"
 	"log"
 
+	"github.com/muzcategui1106/kitchen-wizard/pkg/db/repository"
 	"github.com/muzcategui1106/kitchen-wizard/pkg/util/swagger"
 
 	"github.com/gin-gonic/gin"
@@ -32,8 +33,8 @@ const (
 func NewApiServer(ctx context.Context, cfg ApiServerConfig, opts ...ApiServerOption) (*ApiServer, error) {
 	r := gin.Default()
 	s := &ApiServer{
-		engine: r,
-		dbConn: cfg.DBConn,
+		engine:               r,
+		ingredientRepository: repository.NewIngredientRepository(cfg.DBConn),
 	}
 
 	for _, opt := range opts {
@@ -45,6 +46,7 @@ func NewApiServer(ctx context.Context, cfg ApiServerConfig, opts ...ApiServerOpt
 	{
 		apiV1.GET(healthz, V1Healthz())
 		apiV1.GET(loggedUserPath, s.V1GetLoggedUser())
+		apiV1.POST(ingredientCRUDPath, s.V1CreateIngredient())
 	}
 
 	return s, nil

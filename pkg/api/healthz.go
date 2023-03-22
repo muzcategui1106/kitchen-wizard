@@ -13,7 +13,7 @@ import (
 // @Description do ping
 // @Tags example
 // @Produce json
-// @Success 200
+// @Success 200 {object} HealthzResponse
 // @Router /healthz [get]
 func V1Healthz() gin.HandlerFunc {
 	return func(c *gin.Context) {
