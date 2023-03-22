@@ -20,14 +20,7 @@ go-build: swagger-doc-generation
 	go build -o ./bin/api
 
 run-localhost: go-build
-	./bin/api --dex-provider-url "https://dex.dex.local.uzcatm-skylab.com" \
-	--oidc-client-id example-app \
-	--oidc-client-secret ZXhhbXBsZS1hcHAtc2VjcmV0 \
-	--oidc-redirect-url "http://localhost:8443" \
-	--postgres-db-hostname localhost \
-	--postgres-db-username kitchenwizard \
-	--postgres-db-port "6432" \
-	--postgres-db-password $(LOCAL_DB_PASSWORD)
+	./scripts/run-localhost.sh
 
 build-local:
 	echo "building image"
