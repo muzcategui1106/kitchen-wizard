@@ -5,10 +5,15 @@ namespace: kitchen-wizard
 
 isLocal: false
 
-image:
-  repository: kitchen-wizard
-  tag: 0.0.1
-  pullPolicy: Always
+images:
+  api:
+    URI: kitchen-wizard
+    tag: 0.0.1
+    pullPolicy: Always
+  ui:
+    URI: kitchen-wizard-ui
+    tag: 0.0.1
+    pullPolicy: Always
 
 resources:
   limits:

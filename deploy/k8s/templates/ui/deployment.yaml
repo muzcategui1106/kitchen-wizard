@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ui
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: ui
+    chart: {{ template "kitchen-wizard.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 3
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: ui
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: ui
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: ui
+          image: "{{ .Values.images.ui.URI }}:{{ .Values.images.ui.tag }}"
+          imagePullPolicy: {{ .Values.images.ui.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+

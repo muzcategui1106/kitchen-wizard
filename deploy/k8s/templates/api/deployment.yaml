@@ -42,8 +42,8 @@ spec:
           - --postgres-db-username={{ .Values.dbUsername }}
           - --postgres-db-password={{ .Values.dbPassword }} # this is ok because it is a local instance for development purposes
           {{ end }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ .Values.images.api.URI }}:{{ .Values.images.api.tag }}"
+          imagePullPolicy: {{ .Values.images.api.pullPolicy }}
           ports:
             - name: https
               containerPort: 8443

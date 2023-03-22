@@ -1,0 +1,21 @@
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: ui
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ template "kitchen-wizard.name" . }}
+    chart: {{ template "kitchen-wizard.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    kubernetes.io/ingress.class: contour
+spec:
+  virtualhost:
+    fqdn: {{ .Values.uiURL }}
+  routes:
+    - conditions:
+      - prefix: /
+      services:
+        - name: ui
+          port: 8443

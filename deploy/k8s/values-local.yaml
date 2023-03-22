@@ -1,10 +1,17 @@
 isLocal: true
 
-image:
-  tag: local
-  pullPolicy: IfNotPresent
+images:
+  api:
+    URI: kitchen-wizard
+    tag: local
+    pullPolicy: IfNotPresent
+  ui:
+    URI: kitchen-wizard-ui
+    tag: local
+    pullPolicy: IfNotPresent
 
 apiURL: api.kitchen-wizard.local.uzcatm-skylab.com
+uiURL: ui.kitchen-wizard.local.uzcatm-skylab.com
 jaegerCollectorURL: collector.observability.local.uzcatm-skylab.com
 dexURL: dex.dex.local.uzcatm-skylab.com
 

@@ -28,8 +28,9 @@ build-local:
 	docker build  -t kitchen-wizard-ui:local -f frontend/Dockerfile frontend
 
 deploy-local: build-local
-	echo "loading image to local cluster"
+	echo "loading images to local cluster"
 	kind load docker-image kitchen-wizard:local
+	kind load docker-image kitchen-wizard-ui:local
 
 	echo "generating k8s manifests"
 	helm template development deploy/k8s/ --values deploy/k8s/values-local.yaml --set dbPassword=$(LOCAL_DB_PASSWORD) --set localInterfaceIP=${PRIMARY_INTERFACE_IP} | kubectl apply -f /dev/stdin

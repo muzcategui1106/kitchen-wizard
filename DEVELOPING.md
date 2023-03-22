@@ -12,6 +12,7 @@ This page is intended to explain how to properly develop/test the application an
 * [helm](https://helm.sh/docs/intro/install/)
 * [golang](https://go.dev/doc/install)
 * complete [local_setup](./local_setup.md)
+* [npm](https://docs.npmjs.com/)
 
 ***Note*** In macOS systems you need to isntall docker-desktop as opposed to docker which includes the docker daemon. You also need to disable buildkit as it will make your builds to fail. Simply disable by going into settings. 
 
@@ -29,6 +30,12 @@ This page is intended to explain how to properly develop/test the application an
 
 
 # Deploying a local copy of the application
+
+***NOTE   As a one time setup you need to add the following entried to /etc/hosts for this setup to work properly***
+```
+<IP OF YOUR PRIMARY INTERFACE>     dex.dex.local.uzcatm-skylab.com
+127.0.0.1       api.kitchen-wizard.local.uzcatm-skylab.com  ui.kitchen-wizard.local.uzcatm-skylab.com
+```
 
 * run `make deploy-local VERSION=local`
 
