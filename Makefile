@@ -25,6 +25,7 @@ run-localhost: go-build
 build-local:
 	echo "building image"
 	docker build -t kitchen-wizard:local .
+	docker build  -t kitchen-wizard-ui:local -f frontend/Dockerfile frontend
 
 deploy-local: build-local
 	echo "loading image to local cluster"
