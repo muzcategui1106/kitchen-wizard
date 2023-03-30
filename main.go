@@ -12,6 +12,7 @@ import (
 	rest_middleware "github.com/muzcategui1106/kitchen-wizard/pkg/protocol/rest/middleware"
 	"github.com/muzcategui1106/kitchen-wizard/pkg/util/db/postgres"
 	"github.com/muzcategui1106/kitchen-wizard/pkg/util/oidc"
+	"github.com/muzcategui1106/kitchen-wizard/pkg/util/storage/object"
 	"github.com/muzcategui1106/kitchen-wizard/pkg/util/tracing"
 )
 
@@ -27,6 +28,9 @@ func main() {
 	var postgresDBPort string
 	var postgresDbUsername string
 	var postgresDBPassword string
+	var s3StoreEndpoint string
+	var s3StoreAccessKey string
+	var s3StoreSecretKey string
 
 	flag.IntVar(&logLevel, "log-level", 0, "Global log level")
 	flag.StringVar(&logTimeFormat, "log-time-format", "2006-01-02T15:04:05Z07:00",
@@ -40,6 +44,9 @@ func main() {
 	flag.StringVar(&postgresDBPort, "postgres-db-port", os.Getenv("POSTGRES_DB_PORT"), "the port for the DB")
 	flag.StringVar(&postgresDbUsername, "postgres-db-username", "", "the username for postgres database")
 	flag.StringVar(&postgresDBPassword, "postgres-db-password", os.Getenv("POSTGRES_DB_PASSWORD"), "the psssword for the db. This should be passed as an environmental variable for security purposes")
+	flag.StringVar(&s3StoreEndpoint, "store-s3-endpoint", "https://minio.kitchen-wizard.svc.cluster.local:443", "the s3 endpoint of the object store")
+	flag.StringVar(&s3StoreAccessKey, "store-s3-access-key", os.Getenv("S3_STORE_ACCESS_KEY"), "the s3 endpoint access key ")
+	flag.StringVar(&s3StoreSecretKey, "store-s3-secret-key", os.Getenv("S3_STORE_SECRET_KEY"), "the s3 endpoint access key ")
 
 	flag.Parse()
 
@@ -59,6 +66,17 @@ func main() {
 	}
 	if err = model.AutoMigrateSchemas(dbConn); err != nil {
 		logger.Log.Sugar().Fatal(err)
+	}
+
+	// create object store client
+	logger.Log.Debug("creating s3 client")
+	s3Client, err := object.CreateClient(s3StoreEndpoint, s3StoreAccessKey, s3StoreSecretKey)
+	if err != nil {
+		logger.Log.Fatal(err.Error())
+	}
+	logger.Log.Debug("created s3 client")
+	if err = object.CreateNeccesaryBuckets(s3Client); err != nil {
+		logger.Log.Fatal(err.Error())
 	}
 
 	// create oidc provider config to enable oidc auth

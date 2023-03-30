@@ -2,6 +2,9 @@
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
+# create secrets directory for local secrets
+mkdir -p $SCRIPT_DIR/.secrets
+
 if [[ $OSTYPE == 'darwin'* ]]; then
     sudo docker info
     if [ $? -ne 0 ]; then
@@ -65,3 +68,11 @@ helm repo add postgres-operator-charts https://opensource.zalando.com/postgres-o
 # install the postgres-operator
 helm install postgres-operator postgres-operator-charts/postgres-operator
 ################################################
+
+
+####### minio setup ############
+kubectl krew update
+kubectl krew install minio
+kubectl krew upgrade minio
+kubectl minio init
+##############################

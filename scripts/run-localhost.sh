@@ -2,12 +2,13 @@
 
 SCRIPT_PATH=`readlink -f "$0"`
 SCRIPT_DIR=`dirname "$SCRIPT_PATH"`
-LOCAL_DB_PASSWORD=`kubectl get secret kitchenwizard.acid-minimal-cluster.credentials.postgresql.acid.zalan.do -o 'jsonpath={.data.password}' | base64 -d`
+export POSTGRES_DB_PASSWORD=`kubectl get secret kitchenwizard.acid-minimal-cluster.credentials.postgresql.acid.zalan.do -o 'jsonpath={.data.password}' | base64 -d`
+S3_STORE_ENDPOINT="http://store.s3.local.uzcatm-skylab.com"
 
 function main() {
     trap 'kill %1; kill %2' SIGINT # catch SIGINT and use it to terminate both functions
     run_backend &
-    run_frontend &
+    #run_frontend &
 
     wait
 }
@@ -20,7 +21,7 @@ function run_backend() {
     --postgres-db-hostname localhost \
     --postgres-db-username kitchenwizard \
     --postgres-db-port "6432" \
-    --postgres-db-password $LOCAL_DB_PASSWORD
+    --store-s3-endpoint $S3_STORE_ENDPOINT
 }
 
 function run_frontend() {

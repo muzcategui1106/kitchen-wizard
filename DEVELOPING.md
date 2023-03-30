@@ -7,6 +7,7 @@ This page is intended to explain how to properly develop/test the application an
 * [Docker](https://docs.docker.com/get-docker/)
 * [kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)
 * [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
+* [krew](https://krew.sigs.k8s.io/docs/user-guide/setup/install/)
 * [psql](https://www.postgresql.org/docs/current/app-psql.html)
 * [golang](https://go.dev/doc/install)
 * [helm](https://helm.sh/docs/intro/install/)
@@ -34,10 +35,10 @@ This page is intended to explain how to properly develop/test the application an
 ***NOTE   As a one time setup you need to add the following entried to /etc/hosts for this setup to work properly***
 ```
 <IP OF YOUR PRIMARY INTERFACE>     dex.dex.local.uzcatm-skylab.com
-127.0.0.1       api.kitchen-wizard.local.uzcatm-skylab.com  ui.kitchen-wizard.local.uzcatm-skylab.com
+127.0.0.1       api.kitchen-wizard.local.uzcatm-skylab.com  ui.kitchen-wizard.local.uzcatm-skylab.com store.s3.local.uzcatm-skylab.com kitchen-wizard.store.s3.local.uzcatm-skylab.com
 ```
 
-* run `make deploy-local VERSION=local`
+* run `make deploy-local`
 
 # Running in localhost (non kubernetees run)
 
