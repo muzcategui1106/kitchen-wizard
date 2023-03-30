@@ -7,42 +7,8 @@ export function NavBarLoginButton() {
     const history = useHistory();
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     var loginWindow;
+    const [isLoading, setIsLoading] = useState(false);
     
-    useEffect(() => {
-      window.addEventListener('message', handleMessage);
-    
-      return () => {
-        window.removeEventListener('message', handleMessage);
-      };
-    }, []);
-    
-    function handleMessage(event) {
-      console.log('Received message:', event);
-      console.log(document.cookie);
-        
-      console.log(event)
-      if (event.origin !== 'http://localhost:3000') {
-        console.log('Invalid origin:', event.origin);
-        return;
-      }
-    
-      const token = event.data.token;
-    
-      if (token) {
-        document.cookie = `token=${token}; path=/;`;
-        setIsLoggedIn(true);
-        history.push('/');
-        loginWindow.close()
-      } else {
-        console.log(event.data)
-      }
-    }
-    
-    function handleLogin() {
-      console.log('before event');
-      console.log(document.cookie);
-      loginWindow = window.open('http://localhost:8443/auth/v1/login', '_blank');
-    }
     
     function handleLogout() {
       // Make an API call to logout
@@ -50,13 +16,33 @@ export function NavBarLoginButton() {
       // Redirect the user to the login page
       history.push("/login");
     }
+
+    const handleClick = () => {
+        setIsLoading(true);
+        fetch('http://localhost:8443/auth/v1/login')
+          .then(response => {
+            if (response.ok) {
+              const newTab = window.open(response.url, '_blank');
+              newTab.focus();
+              setIsLoading(false);
+              newTab.addEventListener('load', event => {
+                console.log("got event")
+                console.log(event.data)
+              });
+            } else {
+              console.error(`API returned ${response.status} ${response.statusText}`);
+              setIsLoading(false);
+            }
+          })
+          .catch(error => console.error(error));
+      };
   
     return (
       <Nav className="ml-auto">
         {isLoggedIn ? (
           <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
         ) : (
-          <Nav.Link onClick={handleLogin}>Login</Nav.Link>
+          <Nav.Link onClick={handleClick}>Login</Nav.Link>
         )}
       </Nav>
     );

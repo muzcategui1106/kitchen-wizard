@@ -103,6 +103,7 @@ func (auh *AuthHandler) AuthenticationInterceptor() gin.HandlerFunc {
 	doLogin:
 		logger.Sugar().Debug("user does nnot have an existing session redirecting to login")
 		ctx.Redirect(http.StatusFound, authBasePath+versionV1+login)
+		ctx.Abort()
 	}
 }
 

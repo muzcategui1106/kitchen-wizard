@@ -76,6 +76,9 @@ func (s *ApiServer) V1ListIngredients() gin.HandlerFunc {
 			return
 		}
 
+		requestOrigin := ctx.Request.Header.Get("Origin")
+		ctx.Header("Access-Control-Allow-Origin", requestOrigin)
+		logger.Log.Sugar().Infof("set request origin to %s", requestOrigin)
 		ctx.JSON(http.StatusOK, ingredients)
 	}
 }
