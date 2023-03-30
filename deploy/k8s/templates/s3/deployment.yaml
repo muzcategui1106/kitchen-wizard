@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: store
+  namespace: s3
+  labels:
+    app: store
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: store
+  template:
+    metadata:
+      labels:
+        app: store
+    spec:
+      containers:
+        - name: store
+          args:
+          - -p 9090:9090 
+          - -p 9191:9191
+          image: adobe/s3mock
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 9090
+              protocol: TCP
+            - name: https
+              containerPort: 9191
+              protocol: TCP
+
