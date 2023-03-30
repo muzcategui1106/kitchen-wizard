@@ -2,6 +2,7 @@ package api
 
 import (
 	gooidc "github.com/coreos/go-oidc/v3/oidc"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
@@ -55,5 +56,23 @@ func WithTracing() ApiServerOption {
 			opentracing.GlobalTracer(),
 			ginhttp.MWComponentName("api"),
 		))
+	}
+}
+
+func WithCors() ApiServerOption {
+	return func(s *ApiServer) {
+		config := cors.DefaultConfig()
+		config.AllowAllOrigins = true // TODO for simplicity this needs to be fixed tho
+
+		s.engine.Use(cors.New(config))
+
+		// // TODO for simplicity this needs to be fixed tho
+		// responseCors := func(ctx *gin.Context) {
+		// 	ctx.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, Accept, Origin, Cache-Control, X-Requested-With")
+		// 	ctx.Writer.Header().Add("Access-Control-Allow-Origin", "*")
+		// 	ctx.Writer.Header().Set("Access-Control-Allow-Methods", "*")
+		// 	ctx.Next()
+		// }
+		// s.engine.Use(responseCors)
 	}
 }

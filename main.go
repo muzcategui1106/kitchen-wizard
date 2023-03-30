@@ -82,6 +82,7 @@ func main() {
 	ApiServer, err := api.NewApiServer(
 		mainContext,
 		apiConfig,
+		api.WithCors(),
 		api.WithMiddleware(rest_middleware.StructuredLogger(logger.Log)),
 		api.WithTracing(),
 		api.WithSessionManagement(),
