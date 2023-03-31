@@ -8,7 +8,7 @@ S3_STORE_ENDPOINT="http://store.s3.local.uzcatm-skylab.com"
 function main() {
     trap 'kill %1; kill %2' SIGINT # catch SIGINT and use it to terminate both functions
     run_backend &
-    #run_frontend &
+    run_frontend &
 
     wait
 }
