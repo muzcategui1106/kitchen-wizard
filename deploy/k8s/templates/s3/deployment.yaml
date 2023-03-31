@@ -21,6 +21,8 @@ spec:
           args:
           - -p 9090:9090 
           - -p 9191:9191
+          - -e root=/data
+          - -e retainFilesOnExit=true
           image: adobe/s3mock
           imagePullPolicy: Always
           ports:
@@ -30,4 +32,11 @@ spec:
             - name: https
               containerPort: 9191
               protocol: TCP
+          volumeMounts:
+          - name: data
+            mountPath: /s3-data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: s3-pvc
 
