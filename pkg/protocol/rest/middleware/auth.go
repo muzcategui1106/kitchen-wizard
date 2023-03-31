@@ -1,7 +1,9 @@
 package middleware
 
 import (
+	"context"
 	"encoding/gob"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -27,7 +29,8 @@ const (
 
 // constants for api paths
 const (
-	login = "/login"
+	login  = "/login"
+	logout = "/logout"
 )
 
 func init() {
@@ -64,6 +67,7 @@ func NewAuthHandler(oauth2Config oauth2.Config, idTokenVerifier gooidc.IDTokenVe
 func (auh *AuthHandler) AddAuthHandling(r *gin.Engine) {
 	authGroup := r.Group(authBasePath + versionV1)
 	authGroup.GET(login, auh.handleV1Login())
+	authGroup.GET(logout, auh.handleV1Logout())
 	authGroup.GET(oidc.CallbackURIRelativePath, auh.handleOIDCCallback())
 }
 
@@ -90,7 +94,7 @@ func (auh *AuthHandler) AuthenticationInterceptor() gin.HandlerFunc {
 
 		// do not do login if a session ID has been extracted
 		session := sessions.Default(ctx)
-		email := session.Get(oidc.EmailKey)
+		email := session.Get(oidc.AccessTokenKey)
 		if email == nil {
 			logger.Sugar().Error("could not get session from request. redirecting to login")
 			goto doLogin
@@ -112,6 +116,15 @@ func (auh *AuthHandler) handleV1Login() gin.HandlerFunc {
 		state := util.RandStringRunes(16)
 		nonce := util.RandStringRunes(16)
 		ctx.Redirect(http.StatusFound, auh.oauth2Config.AuthCodeURL(state, gooidc.Nonce(nonce)))
+	}
+}
+
+func (auh *AuthHandler) handleV1Logout() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		session := sessions.Default(ctx)
+		session.Clear()
+		session.Save()
+		ctx.Redirect(http.StatusTemporaryRedirect, "/")
 	}
 }
 
@@ -160,11 +173,18 @@ func (auh *AuthHandler) handleOIDCCallback() gin.HandlerFunc {
 			GivenName  string `json:"given_name"`
 			FamilyName string `json:"family_name"`
 		}
+
 		if err := idToken.Claims(&claims); err != nil {
 			logger.Sugar().Errorf("could  not extract claims from idToken %v", idToken)
 			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "could not extract claims from token"})
 			return
 		}
+
+		userInfo, err := auh.getUserInfo(ctx, oauth2Token)
+		if err != nil {
+			logger.Sugar().Errorf("could not user info due to %s", err.Error())
+		}
+		logger.Sugar().Infof("%v", userInfo)
 
 		// do not do login if a session ID has been extracted
 		session := sessions.Default(ctx)
@@ -182,4 +202,24 @@ func (auh *AuthHandler) handleOIDCCallback() gin.HandlerFunc {
 		logger.Sugar().Infof("succesfully logged user with email %s and is verified %t", claims.Email, claims.Verified)
 		ctx.JSON(http.StatusOK, &V1LoginResponse{Ok: true})
 	}
+}
+
+func (auh *AuthHandler) getUserInfo(ctx context.Context, token *oauth2.Token) (map[string]interface{}, error) {
+	oauth2Client := auh.oauth2Config.Client(ctx, token)
+	req, err := http.NewRequest("GET", "https://api.linkedin.com/v2/me", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := oauth2Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	var data map[string]interface{}
+	err = json.NewDecoder(resp.Body).Decode(&data)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
 }
