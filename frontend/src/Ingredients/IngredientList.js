@@ -65,6 +65,10 @@ function IngredientList() {
               <Card.Body>
                 <Card.Title>{ingredient.name}</Card.Title>
                 <Card.Text>{ingredient.description}</Card.Text>
+                <div>
+                  <a href="#" class="card-link">Update</a>
+                  <a href="#" class="card-link">Delete</a>
+                </div>
               </Card.Body>
             </Card>
           </Col>
