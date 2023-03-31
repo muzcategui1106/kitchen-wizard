@@ -1,8 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Image, Card } from 'react-bootstrap';
+import { IngredientForm } from './AddIngredientForm'
 
+export function IngredientListPanel(){
+  return (
+    <Container>
+      <IngredientForm/>
+      <IngredientList/>
+    </Container>
+  )
+}
 
-export function IngredientList() {
+function IngredientList() {
   const [ingredients, setIngredients] = useState([]);
 
   useEffect(() => {

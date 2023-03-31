@@ -4,7 +4,7 @@ import Nav from "react-bootstrap/Nav";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import NavDropdown from "react-bootstrap/NavDropdown";
 import { NavBarLoginButton } from '../Login/Login';
-import { IngredientList } from '../Ingredients/IngredientList.js'
+import { IngredientListPanel } from '../Ingredients/IngredientList.js'
 
 
 export function TopNavigationBar() {
@@ -34,7 +34,7 @@ export function TopNavigationBar() {
       </Navbar>
       <Switch>
         <Route path="/ingredients">
-          <IngredientList />
+          <IngredientListPanel />
         </Route>
       </Switch>
     </Router>
