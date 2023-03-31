@@ -3,6 +3,7 @@ package api
 import (
 	"strings"
 
+	gooidc "github.com/coreos/go-oidc/v3/oidc"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
@@ -12,6 +13,7 @@ import (
 	"github.com/muzcategui1106/kitchen-wizard/pkg/util/storage/object"
 	"github.com/opentracing-contrib/go-gin/ginhttp"
 	"github.com/opentracing/opentracing-go"
+	"golang.org/x/oauth2"
 	"gorm.io/gorm"
 )
 
@@ -43,7 +45,7 @@ func WithMiddleware(h gin.HandlerFunc) ApiServerOption {
 	}
 }
 
-func WithOIDCAuth(oidcoauth.) ApiServerOption {
+func WithOIDCAuth(oauth2Config oauth2.Config, idTokenVerifier gooidc.IDTokenVerifier) ApiServerOption {
 	authHandler := rest_middleware.NewAuthHandler(oauth2Config, idTokenVerifier)
 
 	return func(s *ApiServer) {
