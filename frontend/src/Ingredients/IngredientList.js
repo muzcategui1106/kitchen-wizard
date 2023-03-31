@@ -28,10 +28,6 @@ function IngredientList() {
   }
 
   useEffect(() => {
-    const headers = new Headers();
-    headers.append('Cookie', document.cookie);
-    console.log(document.cookie)
-
     fetch('http://localhost:8443/api/v1/ingredients?numItems=10', {
       credentials: 'include'
     })
@@ -66,8 +62,8 @@ function IngredientList() {
                 <Card.Title>{ingredient.name}</Card.Title>
                 <Card.Text>{ingredient.description}</Card.Text>
                 <div>
-                  <a href="#" class="card-link">Update</a>
-                  <a href="#" class="card-link">Delete</a>
+                  <a href="#" className="card-link">Update</a>
+                  <a href="#" className="card-link">Delete</a>
                 </div>
               </Card.Body>
             </Card>
