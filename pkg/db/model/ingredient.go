@@ -8,16 +8,16 @@ import (
 
 type Ingredient struct {
 	Model
-	Name        string `json:"name" gorm:"uniqueIndex"`
+	Name string `json:"name" gorm:"uniqueIndex"`
+
 	Description string `json:"description"`
 }
 
-func (u *Ingredient) BeforeCreate(tx *gorm.DB) (err error) {
-
+func (ingredient *Ingredient) BeforeCreate(tx *gorm.DB) (err error) {
 	// create a uuid for the ingredient
-	u.ID = uuid.New()
+	ingredient.ID = uuid.New()
 
 	// ensure the names are consistent upper case at the beginning of each words with no extra spaces between words
-	u.Name = format.ComplyAsTitle(u.Name)
+	ingredient.Name = format.ComplyAsTitle(ingredient.Name)
 	return nil
 }

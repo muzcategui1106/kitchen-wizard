@@ -53,7 +53,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.Ingredient"
+                            "$ref": "#/definitions/api.CreateUpdateIngredientRequest"
                         }
                     }
                 ],
@@ -121,6 +121,9 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "api.CreateUpdateIngredientRequest": {
+            "type": "object"
+        },
         "api.HealthzResponse": {
             "type": "object",
             "properties": {

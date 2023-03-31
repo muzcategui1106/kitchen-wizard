@@ -34,7 +34,7 @@ func NewApiServer(ctx context.Context, cfg ApiServerConfig, opts ...ApiServerOpt
 	r := gin.Default()
 	s := &ApiServer{
 		engine:               r,
-		ingredientRepository: repository.NewIngredientRepository(cfg.DBConn),
+		ingredientRepository: repository.NewIngredientRepository(cfg.DBConn, cfg.ObjectStoreClient),
 	}
 
 	for _, opt := range opts {

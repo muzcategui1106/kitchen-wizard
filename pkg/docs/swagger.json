@@ -41,7 +41,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.Ingredient"
+                            "$ref": "#/definitions/api.CreateUpdateIngredientRequest"
                         }
                     }
                 ],
@@ -109,6 +109,9 @@
         }
     },
     "definitions": {
+        "api.CreateUpdateIngredientRequest": {
+            "type": "object"
+        },
         "api.HealthzResponse": {
             "type": "object",
             "properties": {

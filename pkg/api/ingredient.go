@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/muzcategui1106/kitchen-wizard/pkg/db/model"
 	"github.com/muzcategui1106/kitchen-wizard/pkg/logger"
 )
 
@@ -23,19 +22,19 @@ const (
 // @Description creates a new ingredient to be used for recipes
 // @Tags ingredient
 // @Produce json
-// @Param request body model.Ingredient true "Ingredient to be created"
+// @Param request body CreateUpdateIngredientRequest true "Ingredient to be created"
 // @Success 200 {object}  IngredientCrudResponse
 // @Router /ingredient [post]
 func (s *ApiServer) V1CreateIngredient() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		lg := logger.Log
-		request := &model.Ingredient{}
+		request := &CreateUpdateIngredientRequest{}
 		if err := ctx.ShouldBind(request); err != nil {
 			lg.Sugar().Errorf("could not deserialize into model.Ingredient due to %s", err)
 			ctx.AbortWithStatusJSON(http.StatusBadRequest, ErrorResponse{Code: http.StatusNotAcceptable, Error: fmt.Sprintf("failed to deseiralize object due to ... %s", err.Error())})
 			return
 		}
-		err := s.ingredientRepository.Create(ctx, request)
+		err := s.ingredientRepository.Create(ctx, request.Ingredient, request.Image)
 		if err != nil {
 			lg.Sugar().Errorf("could not create entry in db due to ... %v", err)
 			ctx.AbortWithStatusJSON(http.StatusNotAcceptable, ErrorResponse{Code: http.StatusNotAcceptable, Error: err.Error()})
@@ -81,4 +80,5 @@ func (s *ApiServer) V1ListIngredients() gin.HandlerFunc {
 		logger.Log.Sugar().Infof("set request origin to %s", requestOrigin)
 		ctx.JSON(http.StatusOK, ingredients)
 	}
+
 }

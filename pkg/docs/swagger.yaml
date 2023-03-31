@@ -1,4 +1,6 @@
 definitions:
+  api.CreateUpdateIngredientRequest:
+    type: object
   api.HealthzResponse:
     properties:
       ok:
@@ -49,7 +51,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/model.Ingredient'
+          $ref: '#/definitions/api.CreateUpdateIngredientRequest'
       produces:
       - application/json
       responses:

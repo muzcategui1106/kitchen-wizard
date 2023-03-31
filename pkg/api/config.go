@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/muzcategui1106/kitchen-wizard/pkg/db/repository"
 	rest_middleware "github.com/muzcategui1106/kitchen-wizard/pkg/protocol/rest/middleware"
+	"github.com/muzcategui1106/kitchen-wizard/pkg/util/storage/object"
 	"github.com/opentracing-contrib/go-gin/ginhttp"
 	"github.com/opentracing/opentracing-go"
 	"golang.org/x/oauth2"
@@ -19,7 +20,8 @@ import (
 type ApiServerOption func(s *ApiServer)
 
 type ApiServerConfig struct {
-	DBConn *gorm.DB
+	DBConn            *gorm.DB
+	ObjectStoreClient object.Storage
 }
 
 // ApiServer represents a kitchenwizard api server
