@@ -75,7 +75,7 @@ func main() {
 		logger.Log.Fatal(err.Error())
 	}
 	logger.Log.Debug("created s3 client")
-	if err = object.CreateNeccesaryBuckets(s3Client); err != nil {
+	if err = s3Client.CreateNeccesaryBuckets(); err != nil {
 		logger.Log.Fatal(err.Error())
 	}
 
@@ -95,7 +95,8 @@ func main() {
 
 	// start http server
 	apiConfig := api.ApiServerConfig{
-		DBConn: dbConn,
+		DBConn:            dbConn,
+		ObjectStoreClient: s3Client,
 	}
 	ApiServer, err := api.NewApiServer(
 		mainContext,
@@ -116,5 +117,4 @@ func main() {
 	// run forerver
 	stop := make(chan struct{}, 1)
 	<-stop
-
 }
