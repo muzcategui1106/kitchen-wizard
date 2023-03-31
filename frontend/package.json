@@ -9,13 +9,18 @@
     "child_process": false
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.303.0",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "aws-sdk": "^2.1347.0",
     "axios": "latest",
     "bootstrap": "^5.2.3",
     "fs": "^0.0.1-security",
     "history": "^5.3.0",
+    "http": "^0.0.1-security",
+    "http-browserify": "^1.7.0",
+    "https": "^1.0.0",
     "open": "^9.0.0",
     "os": "^0.1.2",
     "path": "^0.12.7",
@@ -25,6 +30,9 @@
     "react-router": "^5.3.0",
     "react-router-dom": "^5.3.0",
     "react-scripts": "5.0.1",
+    "request": "^2.88.2",
+    "stream": "^0.0.2",
+    "url": "^0.11.0",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
