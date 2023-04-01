@@ -8,9 +8,10 @@ import (
 
 type Ingredient struct {
 	Model
-	Name string `json:"name" gorm:"uniqueIndex"`
 
+	Name        string `json:"name" gorm:"uniqueIndex"`
 	Description string `json:"description"`
+	ImageURL    string `json:"imageURL"`
 }
 
 func (ingredient *Ingredient) BeforeCreate(tx *gorm.DB) (err error) {
