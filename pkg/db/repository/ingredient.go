@@ -21,7 +21,7 @@ type UploadImageFunc func([]byte) error
 // IIngredient represents interface for allowed actions against ingredentients
 type IIngredient interface {
 	// Create an ingredient to the DB
-	Create(context.Context, *model.Ingredient, []byte) error
+	Create(context.Context, *model.Ingredient) error
 
 	// returns the first X ingredients sort by alphabetical order
 	First(context.Context, int) ([]model.Ingredient, error)
@@ -39,14 +39,9 @@ func NewIngredientRepository(db *gorm.DB, iObjectStorage object.Storage) IIngred
 	}
 }
 
-func (repo *Ingredient) Create(ctx context.Context, i *model.Ingredient, image []byte) error {
+func (repo *Ingredient) Create(ctx context.Context, i *model.Ingredient) error {
 	tx := repo.db.Begin()
 	if err := tx.WithContext(ctx).Create(i).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	if err := repo.iObjectStorage.Save(imageKey(i), image); err != nil {
 		tx.Rollback()
 		return err
 	}

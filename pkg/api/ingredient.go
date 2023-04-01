@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/muzcategui1106/kitchen-wizard/pkg/db/model"
 	"github.com/muzcategui1106/kitchen-wizard/pkg/logger"
 )
 
@@ -28,13 +29,13 @@ const (
 func (s *ApiServer) V1CreateIngredient() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		lg := logger.Log
-		request := &CreateUpdateIngredientRequest{}
+		request := &model.Ingredient{}
 		if err := ctx.ShouldBind(request); err != nil {
 			lg.Sugar().Errorf("could not deserialize into model.Ingredient due to %s", err)
 			ctx.AbortWithStatusJSON(http.StatusBadRequest, ErrorResponse{Code: http.StatusNotAcceptable, Error: fmt.Sprintf("failed to deseiralize object due to ... %s", err.Error())})
 			return
 		}
-		err := s.ingredientRepository.Create(ctx, request.Ingredient, request.Image)
+		err := s.ingredientRepository.Create(ctx, request)
 		if err != nil {
 			lg.Sugar().Errorf("could not create entry in db due to ... %v", err)
 			ctx.AbortWithStatusJSON(http.StatusNotAcceptable, ErrorResponse{Code: http.StatusNotAcceptable, Error: err.Error()})
